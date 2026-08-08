@@ -16,7 +16,7 @@ namespace Application.Service
             var logsLidos = new List<LogEntity>();
             try
             {
-                using (var reader = new StreamReader(file))
+                using (StreamReader reader = new StreamReader(file))
                 {
                     string line;
                     while ((line = await reader.ReadLineAsync()) != null)
@@ -70,7 +70,7 @@ namespace Application.Service
                             var endpoint = parts[6];
                             var endpointMethod = parts[5];
                             var endpointStatusCode = parts[7];
-                            var userAgent = parts[10] + parts[11];
+                            var userAgent = parts[11];
                             var date = parts[3] + parts[4];
                             logsLidos.Add(new LogEntity(endpoint, endpointMethod, endpointStatusCode, userAgent, date));
                         }
@@ -80,7 +80,7 @@ namespace Application.Service
                     .GroupBy(kvp => kvp.GetEndpoints())
                     .OrderByDescending(x => x.Count())
                     .Take(10)
-                    .SelectMany(group=> group)
+                    .SelectMany(group => group)
                    .ToList();
 
                 return topEndpoints;
@@ -93,7 +93,65 @@ namespace Application.Service
             }
         }
 
+        public async Task RegisterLogAsync(string fileName,string filePath, string originalFile)
+        {
+            var file = fileName;
+            try
+            {
+                if(!fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+                {
+                    file += ".xls";
+                }
+                var fullPath = Path.Combine(filePath, file);
+                var diretorio = Path.GetDirectoryName(fullPath);
+
+                if(!string.IsNullOrEmpty(diretorio) && !Directory.Exists(diretorio))
+                {
+                    Directory.CreateDirectory(diretorio);
+                }
+                using (StreamWriter writer = new StreamWriter(fullPath, false, Encoding.UTF8))
+                {
+                  await  writer.WriteLineAsync("-----IP ADDRESS----");
+                  await  writer.WriteLineAsync("IP Address;Date");
+                    foreach (var log in await GetIpAddressAsync(originalFile))
+                    {
+                        var escapedIpAddress = log.Key.EscapeMarkup();
+                        var escapedDate = log.Value.EscapeMarkup();
+                        await writer.WriteLineAsync($"{escapedIpAddress};{escapedDate}");
+                    }
+
+                    await writer.WriteLineAsync();
+
+                    await writer.WriteLineAsync("-----ENDPOINTS----");
+                    await writer.WriteLineAsync("Endpoint;Method;Status Code;User Agent");
+                    foreach (var log in await GetEndPointAsync(originalFile))
+                    {
+                        var escapedEndpoint = log.Endpoint.EscapeMarkup();
+                        var escapedMethod = log.EndpointMethod.EscapeMarkup();
+                        var escapedStatusCode = log.EndpointStatusCode.EscapeMarkup();
+                        var escapedUserAgent = log.UserAgent.EscapeMarkup();
+                        var escapedDate = log.Date.EscapeMarkup();
+                        await writer.WriteLineAsync($"{escapedEndpoint};{escapedMethod};{escapedStatusCode};{escapedUserAgent}");
+                    }
+                  AnsiConsole.MarkupLine($"[green]Log file path registered successfully: {fullPath}[/]");
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Error registering the log file path: {ex.Message}[/]");
+                throw;
+
+            }
+        }
+
 
     }
-}
+    
+      
+
+    } 
+
+    
+
+
 
