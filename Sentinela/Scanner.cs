@@ -1,4 +1,5 @@
 ﻿using Application.Service;
+using Core.Models;
 using Spectre.Console;
 using System.Runtime.CompilerServices;
 
@@ -6,7 +7,7 @@ namespace Sentinela
 {
     public class Scanner
     {
-        private static readonly IpAddressService addressService = new IpAddressService();
+        private static readonly logAddressService addressService = new logAddressService();
         public static async Task Main(string[] args)
         {
             var title = new FigletText("Sentinela")
@@ -45,7 +46,8 @@ namespace Sentinela
                 switch (toppings)
                 {
                     case var t when t.Contains("Sentinela-Analyzer-Log"):
-                        AnsiConsole.MarkupLine("[green]You selected Sentinela-Analyzer-Log\nThis tool select the top 10 IP with date[/]");
+                        AnsiConsole.MarkupLine("[green]You selected Sentinela-Analyzer-Log\nThis tool select the top 10 IP with date, endpoint,method" +
+                            "status of code and user agent[/]");
                         var confirmed = AnsiConsole.Confirm("Do you want to continue?");
                         if (!confirmed)
                         {
@@ -60,8 +62,9 @@ namespace Sentinela
                               });
 
                         var enteredFilePath = await AnsiConsole.AskAsync<string>("Enter the [green]file path[/]:");
-                        var formatedFilePath = enteredFilePath.Trim('\'', '"', '@', ' ');
+                        var formatedFilePath = enteredFilePath.Trim('\'', '"', '@', ' ', '/');
                         var result = await addressService.GetIpAddressAsync(formatedFilePath);
+                        List<LogEntity> resultEndPoint = await addressService.GetEndPointAsync(formatedFilePath);
                         var tableIpAddress = new Table();
                         tableIpAddress.AddColumn("[bold white]IP Address[/]").AddColumns("[bold blue]Date[/]");
                         foreach (KeyValuePair<string, string> kvp in result)
@@ -69,6 +72,13 @@ namespace Sentinela
                             tableIpAddress.AddRow($"[white]{kvp.Key}[/]", $"[blue]{kvp.Value.EscapeMarkup()}[/]");
                         }
                         AnsiConsole.Write(tableIpAddress);
+                        var tableEndPoint = new Table();
+                        tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
+                        foreach (LogEntity endpoint in resultEndPoint)
+                        {
+                         tableEndPoint.AddRow($"[white]{endpoint.Endpoint}[/]", $"[blue]{endpoint.EndpointStatusCode}[/]", $"[green]{endpoint.EndpointMethod}[/]", $"[yellow]{endpoint.UserAgent}[/]");
+                        }
+                        AnsiConsole.Write(tableEndPoint);
                         break;
                     case var t when t.Contains("Management-.Env"):
                         AnsiConsole.MarkupLine("[green]You selected Management-.Env[/]");
