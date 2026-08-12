@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Application.Service
@@ -93,26 +94,26 @@ namespace Application.Service
             }
         }
 
-        public async Task RegisterLogAsync(string fileName,string filePath, string originalFile)
+        public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
             var file = fileName;
             try
             {
-                if(!fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+                if (!fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
                 {
                     file += ".xls";
                 }
                 var fullPath = Path.Combine(filePath, file);
                 var diretorio = Path.GetDirectoryName(fullPath);
 
-                if(!string.IsNullOrEmpty(diretorio) && !Directory.Exists(diretorio))
+                if (!string.IsNullOrEmpty(diretorio) && !Directory.Exists(diretorio))
                 {
                     Directory.CreateDirectory(diretorio);
                 }
                 using (StreamWriter writer = new StreamWriter(fullPath, false, Encoding.UTF8))
                 {
-                  await  writer.WriteLineAsync("-----IP ADDRESS----");
-                  await  writer.WriteLineAsync("IP Address;Date");
+                    await writer.WriteLineAsync("-----IP ADDRESS----");
+                    await writer.WriteLineAsync("IP Address;Date");
                     foreach (var log in await GetIpAddressAsync(originalFile))
                     {
                         var escapedIpAddress = log.Key.EscapeMarkup();
@@ -133,7 +134,7 @@ namespace Application.Service
                         var escapedDate = log.Date.EscapeMarkup();
                         await writer.WriteLineAsync($"{escapedEndpoint};{escapedMethod};{escapedStatusCode};{escapedUserAgent}");
                     }
-                  AnsiConsole.MarkupLine($"[green]Log file path registered successfully: {fullPath}[/]");
+                    AnsiConsole.MarkupLine($"[green]Log file path registered successfully: {fullPath}[/]");
                 }
             }
             catch (Exception ex)
@@ -143,13 +144,8 @@ namespace Application.Service
 
             }
         }
-
-
     }
-    
-      
-
-    } 
+}
 
     
 
