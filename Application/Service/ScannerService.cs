@@ -68,24 +68,7 @@ namespace Application.Service
                             var formatedFilePathForRegister = enteredFilePathForRegister.Trim('\'', '"', ' ');
                             var formatedFileName = filePathName.Trim('\'', '"', ' ');
                             await readFileService.ReadFileAsync(formatedFilePath);
-                            var result = await addressService.GetIpAddressAsync(formatedFilePath);
-                            List<LogEntity> resultEndPoint = await addressService.GetEndPointAsync(formatedFilePath);
                             await addressService.RegisterLogAsync(formatedFileName, formatedFilePathForRegister, formatedFilePath);
-                            var tableIpAddress = new Table();
-                            tableIpAddress.AddColumn("[bold white]IP Address[/]").AddColumns("[bold blue]Date[/]");
-                            foreach (KeyValuePair<string, string> kvp in result)
-                            {
-                                tableIpAddress.AddRow($"[white]{kvp.Key}[/]", $"[blue]{kvp.Value.EscapeMarkup()}[/]");
-                            }
-                            AnsiConsole.Write(tableIpAddress);
-                            var tableEndPoint = new Table();
-                            tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
-                            foreach (LogEntity endpoint in resultEndPoint)
-                            {
-                                tableEndPoint.AddRow($"[white]{endpoint.Endpoint}[/]", $"[blue]{endpoint.EndpointStatusCode}[/]", $"[green]{endpoint.EndpointMethod}[/]", $"[yellow]{endpoint.UserAgent}[/]");
-                            }
-                            AnsiConsole.Write(tableEndPoint);
-
                             break;
                         }
 
