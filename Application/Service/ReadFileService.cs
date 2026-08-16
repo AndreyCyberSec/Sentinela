@@ -82,14 +82,18 @@ namespace Application.Service
 
         public async Task ReadFileJsonAsync(string filePath)
         {
-            List<JsonEntity> result = await _jsonAddressService.ReadJsonAsync(filePath);
+            List<JsonEntity?> result = await _jsonAddressService.ReadJsonAsync(filePath);
 
             var tableJson = new Table();
-            tableJson.AddColumn("[bold white]TimeStamp[/]").AddColumns("[bold green]Severity[/]")
-                .AddColumns("[bold yellow]Ip Address[/]").AddColumns("[bold red]Message[/]");
-            foreach (JsonEntity json in result)
+            tableJson.AddColumns("[bold white]TimeStamp[/]", "[bold green]Severity[/]", "[bold yellow]Ip Address[/]", "[bold red]Message[/]");
+            foreach (JsonEntity? json in result)
             {
-                tableJson.AddRow($"[white]{json.TimeStamp}[/]", $"[green]{json.Severity}[/]", $"[yellow]{json.IpAddress}[/]", $"[red]{json.Message.EscapeMarkup()}[/]");
+                if (json == null) continue;
+                string timestamp = json.TimeStamp.EscapeMarkup() ?? "-";
+                var severity = json.Severity.EscapeMarkup() ?? "-";
+                var ipAddress = json.IpAddress.EscapeMarkup() ?? "-";
+                var message = json.Message.EscapeMarkup() ?? "-";
+                tableJson.AddRow($"[white]{timestamp}[/]", $"[green]{severity}[/]", $"[yellow]{ipAddress}[/]", $"[red]{message}[/]");
             }
             AnsiConsole.Write(tableJson);
         }

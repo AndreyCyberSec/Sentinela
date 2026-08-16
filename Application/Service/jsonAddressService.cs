@@ -4,6 +4,7 @@ using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -12,45 +13,39 @@ namespace Application.Service
 {
     public class jsonAddressService
     {
-        
-        public async Task<List<JsonEntity?>> ReadJsonAsync(string filePath)
+        private readonly JsonSerializerOptions optionsJson = new JsonSerializerOptions
         {
-            var file = filePath;
-            var logsLidos = new List<JsonEntity?>();
+            PropertyNameCaseInsensitive = true
+        };
+    public async Task<List<JsonEntity?>> ReadJsonAsync(string filePath)
+        {
+            
             try
             {
                 if (!File.Exists(filePath))
                 {
-                    AnsiConsole.MarkupLine($"[red]The JSON log file does not exist: {file}[/]");
+                    AnsiConsole.MarkupLine($"[red]The JSON log file does not exist: {filePath}[/]");
                     return null;
                 }
-                using (StreamReader reader = new StreamReader(file))
-                {
-                    string line;
-                    while ((line = await reader.ReadLineAsync()) != null)
-                    {
-                       line.AsSpan().Slice(0,100);
-                        if (line.Length > 0)
-                        {
-                            var timestamp = line.Substring(0, 15).Trim();
-                            var severity = line.Substring(15, 5).Trim();
-                            var ipAddress = line.Substring(20, 11).Trim();
-                            var message = line.Substring(31, 13).Trim();
-                            logsLidos.Add(new JsonEntity(timestamp, severity, ipAddress, message));
-                        }
+               await  using var reader = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-                        
-                    }
-                    var top10Logs = logsLidos
+                var logsLidos = await JsonSerializer.DeserializeAsync<List<JsonEntity>>(reader, optionsJson);
+
+                var top10Logs = logsLidos
                             .GroupBy(log => log.GetLogDetails())
                             .OrderByDescending(group => group.Count())
                             .SelectMany(group => group)
                             .Take(10)
                             .ToList();
 
-                    return logsLidos;
+                    return top10Logs;
+                
                 }
-                }
+            catch (JsonException jsonEx)
+            {
+                AnsiConsole.MarkupLine($"[red]Error deserializing the JSON log file: {jsonEx.Message}[/]");
+                throw;
+            }
             catch (Exception ex)
             {
                 AnsiConsole.MarkupLine($"[red]Error reading the JSON log file: {ex.Message}[/]");

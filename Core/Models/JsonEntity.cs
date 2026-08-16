@@ -12,7 +12,7 @@ namespace Core.Models
         [JsonPropertyName("timestamamp")]
         public string TimeStamp { get; }
         [JsonPropertyName("event_id")]
-        public string EventId { get; }
+        public int EventId { get; }
         [JsonPropertyName("severity")]
         public string Severity { get; }
         [JsonPropertyName("source")]
@@ -30,7 +30,7 @@ namespace Core.Models
         }
 
         public JsonEntity() { }
-        public JsonEntity(string timeStamp, string eventId, string severity, string source, string user, string ipAddress, string message)
+        public JsonEntity(string timeStamp, int eventId, string severity, string source, string user, string ipAddress, string message)
         {
             TimeStamp = timeStamp;
             EventId = eventId;
