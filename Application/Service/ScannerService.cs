@@ -13,12 +13,14 @@ namespace Application.Service
         private readonly logAddressService addressService;
         private readonly jsonAddressService jsonService;
         private readonly ReadFileServiceImpl readFileService;
+        private readonly RegisterFileService registerFileService;
 
-        public ScannerService(logAddressService logAddressService, jsonAddressService jsonAddressService, ReadFileServiceImpl _readFileService)
+        public ScannerService(logAddressService logAddressService, jsonAddressService jsonAddressService, ReadFileServiceImpl _readFileService, RegisterFileService registerFileService)
         {
             addressService = logAddressService;
             jsonService = jsonAddressService;
             readFileService = _readFileService;
+            this.registerFileService = registerFileService;
         }
         public async Task ScannerToolAsync()
         {
@@ -68,7 +70,14 @@ namespace Application.Service
                             var formatedFilePathForRegister = enteredFilePathForRegister.Trim('\'', '"', ' ');
                             var formatedFileName = filePathName.Trim('\'', '"', ' ');
                             await readFileService.ReadFileAsync(formatedFilePath);
-                            await addressService.RegisterLogAsync(formatedFileName, formatedFilePathForRegister, formatedFilePath);
+                            if (formatedFilePath.EndsWith(".json"))
+                            {
+                                await registerFileService.RegisterJsonAsync(formatedFilePath, formatedFileName, formatedFilePathForRegister);
+                            }
+                            else
+                            {
+                                await addressService.RegisterLogAsync(formatedFileName, formatedFilePathForRegister, formatedFilePath);
+                            }
                             break;
                         }
 

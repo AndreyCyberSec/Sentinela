@@ -29,7 +29,8 @@ namespace Sentinela
             var scannerService = new ScannerService(
                 new logAddressService(),
                 new jsonAddressService(),
-                new ReadFileServiceImpl()
+                new ReadFileServiceImpl(),
+                new RegisterFileService()
             );
             var scanner = new Scanner(scannerWebService, scannerService);
             await scanner.RunAsync();

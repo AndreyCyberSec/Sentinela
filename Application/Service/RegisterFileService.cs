@@ -1,7 +1,11 @@
-﻿using Spectre.Console;
+﻿using ClosedXML.Excel;
+using Core.Models;
+using DocumentFormat.OpenXml.Spreadsheet;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,16 +13,9 @@ namespace Application.Service
 {
     public class RegisterFileService
     {
-        private readonly jsonAddressService _jsonAddressService;
-        private readonly logAddressService _logAddressService;
-
-        public RegisterFileService(jsonAddressService jsonAddressService, logAddressService logAddressService)
-        {
-            _jsonAddressService = jsonAddressService;
-            _logAddressService = logAddressService;
-        }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
+            logAddressService _logAddressService = new logAddressService();
             var file = fileName;
             try
             {
@@ -67,22 +64,89 @@ namespace Application.Service
 
             }
         }
-        public async Task RegisterJsonAsync(string fileName, string filePath, string originalFile)
+        public async Task RegisterJsonAsync(string originalFile, string fileName, string outPutDirectory)
         {
-            if(string.IsNullOrEmpty(fileName)){
+            jsonAddressService _jsonAddressService = new jsonAddressService();
+            if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(outPutDirectory))
+            {
                 AnsiConsole.MarkupLine("[red] You need insert a name file for continue[/]");
                 return;
             }
             try
             {
-                if(!fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
+                string fullPath = Path.GetFullPath(outPutDirectory);
+
+                if (Directory.Exists(fullPath))
                 {
-                    fileName += ".xls";
+                    string nameFile = fileName;
+                    fullPath = Path.Combine(fullPath, nameFile);
                 }
+                else if (!fullPath.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+                {
+                    fullPath += ".xlsx";
+                }
+
+                string? directoryPath = Path.GetDirectoryName(fullPath);
+                if (!string.IsNullOrEmpty(directoryPath) && !Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);
+                }
+
+                //criação da planilha
+                using var workBook = new XLWorkbook();
+                var workSheet = workBook.Worksheets.Add("Logs de auditoria");
+
+                //criação dos cabeçalhos
+                workSheet.Cell(1, 1).Value = "TimeStamp";
+                workSheet.Cell(1, 2).Value = "Severity";
+                workSheet.Cell(1, 3).Value = "IpAddress";
+                workSheet.Cell(1, 4).Value = "Message";
+
+                //estilização dos cabeçalhos
+                var headerRow = workSheet.Row(1);
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#1F4E78");
+                headerRow.Style.Font.FontColor = XLColor.White;
+
+                var logs = await _jsonAddressService.ReadJsonAsync(originalFile);
+                if (logs == null || logs.Count == 0)
+                {
+                    AnsiConsole.MarkupLine("[yellow]No log records found to export.[/]");
+                    return;
+                }
+
+                //preenchimento das linhas
+                int currentRow = 2;
+                foreach (var row in logs)
+                {
+                    if (row == null) continue;
+                    workSheet.Cell(currentRow, 1).Value = row.TimeStamp.ToString() ?? "-";
+                    workSheet.Cell(currentRow, 2).Value = row.Severity ?? "-";
+                    workSheet.Cell(currentRow, 3).Value = row.Source ?? "-";
+                    workSheet.Cell(currentRow, 4).Value = row.IpAddress ?? "-"  ;
+                    workSheet.Cell(currentRow, 5).Value = row.Message ?? "-";
+
+                    if (row.Severity == "CRITICAL")
+                    {
+                        workSheet.Row(currentRow).Style.Fill.BackgroundColor = XLColor.FromHtml("#FCE4D6");
+                    }
+
+                    currentRow++;
+                }
+
+                workSheet.Columns().AdjustToContents();
+
+                await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, bufferSize: 4096, useAsync: true);
+               
+                workBook.SaveAs(fileStream);
+                AnsiConsole.MarkupLine($"[green]Log file path registered successfully: {fullPath}[/]");
+
+
             }
             catch (Exception ex)
             {
-
+                AnsiConsole.MarkupLine($"[red]Error registering the log file path: {ex.Message}[/]");
+                throw;
             }
         }
      }
