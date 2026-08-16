@@ -76,7 +76,7 @@ namespace Application.Service
                             }
                             else
                             {
-                                await addressService.RegisterLogAsync(formatedFileName, formatedFilePathForRegister, formatedFilePath);
+                                await registerFileService.RegisterLogAsync(formatedFileName, formatedFilePathForRegister, formatedFilePath);
                             }
                             break;
                         }

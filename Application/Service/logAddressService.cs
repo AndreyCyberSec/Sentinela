@@ -94,56 +94,7 @@ namespace Application.Service
             }
         }
 
-        public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
-        {
-            var file = fileName;
-            try
-            {
-                if (!fileName.EndsWith(".xls", StringComparison.OrdinalIgnoreCase))
-                {
-                    file += ".xls";
-                }
-                var fullPath = Path.Combine(filePath, file);
-                var diretorio = Path.GetDirectoryName(fullPath);
-
-                if (!string.IsNullOrEmpty(diretorio) && !Directory.Exists(diretorio))
-                {
-                    Directory.CreateDirectory(diretorio);
-                }
-                using (StreamWriter writer = new StreamWriter(fullPath, false, Encoding.UTF8))
-                {
-                    await writer.WriteLineAsync("-----IP ADDRESS----");
-                    await writer.WriteLineAsync("IP Address;Date");
-                    foreach (var log in await GetIpAddressAsync(originalFile))
-                    {
-                        var escapedIpAddress = log.Key.EscapeMarkup();
-                        var escapedDate = log.Value.EscapeMarkup();
-                        await writer.WriteLineAsync($"{escapedIpAddress};{escapedDate}");
-                    }
-
-                    await writer.WriteLineAsync();
-
-                    await writer.WriteLineAsync("-----ENDPOINTS----");
-                    await writer.WriteLineAsync("Endpoint;Method;Status Code;User Agent");
-                    foreach (var log in await GetEndPointAsync(originalFile))
-                    {
-                        var escapedEndpoint = log.Endpoint.EscapeMarkup();
-                        var escapedMethod = log.EndpointMethod.EscapeMarkup();
-                        var escapedStatusCode = log.EndpointStatusCode.EscapeMarkup();
-                        var escapedUserAgent = log.UserAgent.EscapeMarkup();
-                        var escapedDate = log.Date.EscapeMarkup();
-                        await writer.WriteLineAsync($"{escapedEndpoint};{escapedMethod};{escapedStatusCode};{escapedUserAgent}");
-                    }
-                    AnsiConsole.MarkupLine($"[green]Log file path registered successfully: {fullPath}[/]");
-                }
-            }
-            catch (Exception ex)
-            {
-                AnsiConsole.MarkupLine($"[red]Error registering the log file path: {ex.Message}[/]");
-                throw;
-
-            }
-        }
+       
     }
 }
 
