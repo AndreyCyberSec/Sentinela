@@ -89,11 +89,11 @@ namespace Application.Service
             foreach (JsonEntity? json in result)
             {
                 if (json == null) continue;
-                string timestamp = json.TimeStamp.EscapeMarkup() ?? "-";
+                
                 var severity = json.Severity.EscapeMarkup() ?? "-";
                 var ipAddress = json.IpAddress.EscapeMarkup() ?? "-";
                 var message = json.Message.EscapeMarkup() ?? "-";
-                tableJson.AddRow($"[white]{timestamp}[/]", $"[green]{severity}[/]", $"[yellow]{ipAddress}[/]", $"[red]{message}[/]");
+                tableJson.AddRow($"[white]{json.TimeStamp}[/]", $"[green]{severity}[/]", $"[yellow]{ipAddress}[/]", $"[red]{message}[/]");
             }
             AnsiConsole.Write(tableJson);
         }

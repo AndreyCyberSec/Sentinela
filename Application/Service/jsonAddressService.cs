@@ -15,6 +15,7 @@ namespace Application.Service
     {
         private readonly JsonSerializerOptions optionsJson = new JsonSerializerOptions
         {
+           
             PropertyNameCaseInsensitive = true
         };
     public async Task<List<JsonEntity?>> ReadJsonAsync(string filePath)
@@ -31,16 +32,16 @@ namespace Application.Service
 
                 var logsLidos = await JsonSerializer.DeserializeAsync<List<JsonEntity>>(reader, optionsJson);
 
-                var top10Logs = logsLidos
-                            .GroupBy(log => log.GetLogDetails())
-                            .OrderByDescending(group => group.Count())
-                            .SelectMany(group => group)
-                            .Take(10)
-                            .ToList();
-
-                    return top10Logs;
+                 var top10Logs = logsLidos
+                             .GroupBy(log => log.GetLogDetails())
+                             .OrderByDescending(group => group.Count())
+                             .SelectMany(group => group)
+                             .Take(10)
+                             .ToList();
+                 return top10Logs;
                 
-                }
+
+            }
             catch (JsonException jsonEx)
             {
                 AnsiConsole.MarkupLine($"[red]Error deserializing the JSON log file: {jsonEx.Message}[/]");

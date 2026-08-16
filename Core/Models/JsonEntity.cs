@@ -9,21 +9,20 @@ namespace Core.Models
 {
     public record class JsonEntity
     {
-        [JsonPropertyName("timestamamp")]
-        public string TimeStamp { get; }
+        [JsonPropertyName("timestamp")]
+        public string TimeStamp { get; init; }
         [JsonPropertyName("event_id")]
-        public int EventId { get; }
+        public int EventId { get; init; }
         [JsonPropertyName("severity")]
-        public string Severity { get; }
+        public string Severity { get; init; }
         [JsonPropertyName("source")]
-        public string Source { get; }
+        public string Source { get; init; }
         [JsonPropertyName("user")]
-        public string User { get; }
+        public string User { get; init; }
         [JsonPropertyName("ip_address")]
-        public string IpAddress { get; }
+        public string IpAddress { get; init; }
         [JsonPropertyName("message")]
-        public string Message { get; }
-
+        public string Message { get; init; }
         public List<string> GetLogDetails()
         {
             return new List<string> { TimeStamp, Severity, IpAddress, Message };
