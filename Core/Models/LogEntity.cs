@@ -47,5 +47,83 @@ namespace Core.Models
             UserAgent = userAgent;
             Date = date;
         }
+
+        public LogEntity(string endpoint, string endpointMethod, string endpointStatusCode, string userAgent)
+        {
+
+
+            Endpoint = endpoint;
+            EndpointMethod = endpointMethod;
+            EndpointStatusCode = endpointStatusCode;
+            UserAgent = userAgent;
+        }
+        public static LogEntity ReadOnlyGetIpEntity(string line)
+        {
+            
+            ReadOnlySpan<char> span = line.AsSpan().Trim();
+
+            int nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> ipaddress = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> timestamp = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+         
+           
+
+            return new LogEntity (
+                ipaddress.ToString(),
+                timestamp.ToString()
+                );
+
+           
+        }
+
+        public static LogEntity ReadOnlyGetEndpointEntity(string file)
+        {
+            
+            ReadOnlySpan<char> span = file.AsSpan().Trim();
+
+            int nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> ipaddress = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> timestamp = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> endpoint = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> endpointMethod = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> endpointStatusCode = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            nextSpace = span.IndexOf(' ');
+            ReadOnlySpan<char> userAgent = span.Slice(0, nextSpace);
+            span = span.Slice(nextSpace + 1).TrimStart();
+
+            
+            
+           
+
+            return new LogEntity(
+               endpoint.ToString(),
+               endpointMethod.ToString(),
+               endpointStatusCode.ToString(),
+               userAgent.ToString()
+              
+               );
+        }
+
+        
     }
 }

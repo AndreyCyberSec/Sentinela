@@ -13,9 +13,12 @@ namespace Application.Service
 {
     public class RegisterFileService
     {
+       
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
             logAddressService _logAddressService = new logAddressService();
+
+
             var file = fileName;
             try
             {

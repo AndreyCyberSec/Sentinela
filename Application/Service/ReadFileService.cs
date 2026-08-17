@@ -19,8 +19,8 @@ namespace Application.Service
 
         public ReadFileServiceImpl()
         {
-            _jsonAddressService = new jsonAddressService();
-            _logAddressService = new logAddressService();
+            _jsonAddressService =new jsonAddressService();
+            _logAddressService =new logAddressService();
         }
 
         public bool CanReadFile(string filePath)
@@ -113,7 +113,7 @@ namespace Application.Service
             tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
             foreach (LogEntity endpoint in resultEndPoint)
             {
-                tableEndPoint.AddRow($"[white]{endpoint.Endpoint}[/]", $"[blue]{endpoint.EndpointStatusCode}[/]", $"[green]{endpoint.EndpointMethod}[/]", $"[yellow]{endpoint.UserAgent}[/]");
+                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
         }
@@ -134,7 +134,7 @@ namespace Application.Service
             tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
             foreach (LogEntity endpoint in resultEndPoint)
             {
-                tableEndPoint.AddRow($"[white]{endpoint.Endpoint}[/]", $"[blue]{endpoint.EndpointStatusCode}[/]", $"[green]{endpoint.EndpointMethod}[/]", $"[yellow]{endpoint.UserAgent}[/]");
+                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
         }
