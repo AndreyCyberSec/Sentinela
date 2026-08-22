@@ -29,16 +29,9 @@ namespace Application.Service
                       
                     }
                 }
-                var topAddresses = logsLidos
-                    .GroupBy(kvp => kvp.IpAddress)
-                    .OrderByDescending(x => x.Count())
-                    .Take(10)
-                    .ToDictionary(
-                        group => group.Key,
-                        group => group.Max(x => x.Date)
-                    );
+                Dictionary<string,string> logEntity1 = LogEntity.TopIpaddress(logsLidos);
 
-                return topAddresses;
+                return logEntity1;
             }
             catch (Exception ex)
             {
@@ -67,14 +60,8 @@ namespace Application.Service
                         logsLidos.Add(logEntity);
                     }
                 }
-                var topEndpoints = logsLidos
-                    .GroupBy(kvp => kvp.GetEndpoints())
-                    .OrderByDescending(x => x.Count())
-                    .Take(10)
-                    .SelectMany(group => group)
-                   .ToList();
-
-                return topEndpoints;
+              List<LogEntity> logEntities = LogEntity.TopEndpoint(logsLidos);
+                return logEntities;
 
             }
             catch (Exception ex)
