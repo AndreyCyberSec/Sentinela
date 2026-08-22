@@ -110,10 +110,10 @@ namespace Application.Service
             }
             AnsiConsole.Write(tableIpAddress);
             var tableEndPoint = new Table();
-            tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
+            tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold yellow]UserAgent[/]");
             foreach (LogEntity endpoint in resultEndPoint)
             {
-                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
+                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
         }
@@ -131,10 +131,10 @@ namespace Application.Service
             }
             AnsiConsole.Write(tableIpAddress);
             var tableEndPoint = new Table();
-            tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold yellow]UserAgent[/]");
+            tableEndPoint.AddColumn("[bold white]Endpoint[/]").AddColumns("[bold green]EndpointMethod[/]").AddColumns("[bold blue]EndpointStatus[/]").AddColumns("[bold yellow]UserAgent[/]");
             foreach (LogEntity endpoint in resultEndPoint)
             {
-                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
+                tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
         }
