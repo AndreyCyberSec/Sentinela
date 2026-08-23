@@ -22,9 +22,17 @@ ScanLog/
 │
 ├── 📁 Application/
 │   └── 📁 Service/
+│       ├── 📁 ServiceDesign/
+│       │   └── ScannerWebService.cs
+│       ├── 📁 ServiceFile/
+│       │   ├── ReadFileService.cs
+│       │   └── RegisterFileService.cs
+│       ├── jsonAddressService.cs
+│       ├── logAddressService.cs
+│       └── ScannerService.cs
 │
 ├── 📁 Core/
-│   ├── 📁 Interface/
+│   ├── 📁 InterfaceFile/
 │   │   └── IFileReader.cs
 │   └── 📁 Models/
 │       ├── JsonEntity.cs
