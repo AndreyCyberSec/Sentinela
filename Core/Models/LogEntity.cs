@@ -21,8 +21,9 @@ namespace Core.Models
         {
             return new List<string> { Endpoint, EndpointMethod, EndpointStatusCode, UserAgent };
         }
-
+        //construtor vazio para retorno de erros no parser dos  logs
         public LogEntity() { }
+        //construtor para trazer todos os atributos desse log
         public LogEntity(string ipAddress, string date, string endpoint, string endpointMethod, string endpointStatusCode, string userAgent)
         {
             IpAddress = ipAddress;
@@ -32,13 +33,13 @@ namespace Core.Models
             EndpointStatusCode = endpointStatusCode;
             UserAgent = userAgent;
         }
-
+        //construtor para log de ip
         public LogEntity(string ipAddress, string date)
         {
             IpAddress = ipAddress;
             Date = date;
         }
-
+        //construtor para log de endpoint
         public LogEntity(string endpoint, string endpointMethod, string endpointStatusCode, string userAgent, string date)
         {
            

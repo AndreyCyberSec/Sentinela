@@ -1,4 +1,5 @@
-﻿using Core.Interface;
+﻿using Application.Service;
+using Core.InterfaceFile;
 using Core.Models;
 using Spectre.Console;
 using Spectre.Console.Rendering;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Service
+namespace Application.Service.ServiceFile
 {
 
 

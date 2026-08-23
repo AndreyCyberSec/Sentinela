@@ -1,4 +1,5 @@
-﻿using ClosedXML.Excel;
+﻿using Application.Service;
+using ClosedXML.Excel;
 using Core.Models;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Spectre.Console;
@@ -9,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Service
+namespace Application.Service.ServiceFile
 {
     public class RegisterFileService
     {

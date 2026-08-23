@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Interface
+namespace Core.InterfaceFile
 {
     public interface IFileReader
     {
