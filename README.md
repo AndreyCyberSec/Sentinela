@@ -32,6 +32,7 @@ ScanLog/
 │
 └── 📁 Sentinela/
     └── Scanner.cs
+```
 
 ### 📌 Descrição dos Módulos
 * **Application:** Camada de orquestração e regras de aplicação (Service).
