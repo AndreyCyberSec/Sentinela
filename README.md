@@ -16,6 +16,30 @@ O projeto **Sentinela** foi desenvolvido para centralizar, analisar e correlacio
 
 ---
 
+## 📁 Diretórios e estrutura de arquivos do sistema
+```text
+ScanLog/
+│
+├── 📁 Application/
+│   └── 📁 Service/
+│
+├── 📁 Core/
+│   ├── 📁 Interface/
+│   │   └── IFileReader.cs
+│   └── 📁 Models/
+│       ├── JsonEntity.cs
+│       └── LogEntity.cs
+│
+└── 📁 Sentinela/
+    └── Scanner.cs
+
+### 📌 Descrição dos Módulos
+* **Application:** Camada de orquestração e regras de aplicação (Service).
+* **Core:** Núcleo da solução, contendo as interfaces (Interface) e as entidades de dados (Models).
+* **Sentinela:** Projeto de execução/monitoramento responsável pelo escaneamento (Scanner.cs).
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 * **Linguagem / Runtime:** C# / .NET (ou Python/Bash conforme a implementação)
