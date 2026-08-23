@@ -41,6 +41,9 @@ ScanLog/
 
 ---
 
+## 📝 Arquitetura 
+* **SOLID:** Utilizado o princípio SOLID para modelar a arquitetura do sistema e tornar de toda estrutura do desenvolvimento mais limpo e com facilidade para refatoração do código, implementação de novas funcionalidades e desacoplamento de classes.
+
 ## 🛠️ Tecnologias Utilizadas
 
 * **Linguagem / Runtime:** C# / .NET (ou Python/Bash conforme a implementação)
