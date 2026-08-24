@@ -39,7 +39,7 @@ namespace Core.Models
             IpAddress = ipAddress;
             Date = date;
         }
-        //construtor para log de endpoint
+        //construtor para log de endpoint com data
         public LogEntity(string endpoint, string endpointMethod, string endpointStatusCode, string userAgent, string date)
         {
            
@@ -50,7 +50,7 @@ namespace Core.Models
             UserAgent = userAgent;
             Date = date;
         }
-
+        //construtor para log de endpoint sem data
         public LogEntity(string endpoint, string endpointMethod, string endpointStatusCode, string userAgent)
         {
 
