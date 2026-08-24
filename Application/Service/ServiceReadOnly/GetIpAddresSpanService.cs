@@ -1,4 +1,4 @@
-﻿using Core.Interfaces.InterfaceReadOnlySpan;
+﻿using Core.InterfacesService.InterfaceReadOnlySpan;
 using Core.Models;
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ namespace Application.Service.ServiceReadOnly
 {
     public class GetIpAddresSpanService : IReadOnlySpanLog
     {
+      
         public LogEntity OnlySpan(string line)
         {
             ReadOnlySpan<char> span = line.AsSpan().Trim();
@@ -22,7 +23,7 @@ namespace Application.Service.ServiceReadOnly
 
             //timestamp
             int openBracket = span.IndexOf('[');
-            int closeBracket = span.IndexOf("]");
+            int closeBracket = span.IndexOf(']');
             ReadOnlySpan<char> dateSpan = ReadOnlySpan<char>.Empty;
             if (openBracket != -1 && closeBracket != -1 && closeBracket > openBracket)
             {
@@ -95,5 +96,7 @@ namespace Application.Service.ServiceReadOnly
                 );
 
         }
+
+        
     }
 }

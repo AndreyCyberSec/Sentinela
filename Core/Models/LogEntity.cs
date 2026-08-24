@@ -1,5 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Drawing.Diagrams;
 using DocumentFormat.OpenXml.Vml;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,6 +60,12 @@ namespace Core.Models
             EndpointMethod = endpointMethod;
             EndpointStatusCode = endpointStatusCode;
             UserAgent = userAgent;
+        }
+
+        public void ToFormatedInSpan(string line)
+        {
+            if (string.IsNullOrEmpty(line)) AnsiConsole.MarkupLine($"[red] insert line is empty or null. Try again![/]");
+            else AnsiConsole.MarkupLine($"[green]system is making your date[/]");
         }
         public static LogEntity ReadOnlyGetIpEntity(string line)
         {

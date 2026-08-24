@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Interfaces.InterfaceReadOnlySpan
+namespace Core.InterfacesService.InterfaceReadOnlySpan
 {
     public interface IReadOnlySpanLog
     {
-        public LogEntity OnlySpan(string line);
+        public LogEntity OnlySpan(string line); 
     }
 }
