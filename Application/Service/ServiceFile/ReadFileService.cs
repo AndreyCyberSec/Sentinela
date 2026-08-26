@@ -18,10 +18,10 @@ namespace Application.Service.ServiceFile
         private readonly jsonAddressService _jsonAddressService;
         private readonly logAddressService _logAddressService;
 
-        public ReadFileServiceImpl()
+        public ReadFileServiceImpl(jsonAddressService _jsonAddressService, logAddressService _logAddressService)
         {
-            _jsonAddressService =new jsonAddressService();
-            _logAddressService =new logAddressService();
+            this._jsonAddressService = _jsonAddressService;
+            this._logAddressService = _logAddressService;
         }
 
         public bool CanReadFile(string filePath)

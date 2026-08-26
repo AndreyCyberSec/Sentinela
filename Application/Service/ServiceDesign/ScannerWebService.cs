@@ -1,4 +1,5 @@
-﻿using Spectre.Console;
+﻿using Application.InterfacesService.InterfaceScanner;
+using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Service.ServiceDesign
 {
-    public class ScannerWebService
+    public class ScannerWebService : IScannerWebService
     {
         public async Task ScannerWebApplication()
         {

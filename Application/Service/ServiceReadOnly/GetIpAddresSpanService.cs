@@ -1,4 +1,5 @@
-﻿using Core.InterfacesService.InterfaceReadOnlySpan;
+﻿using Application.InterfacesService.InterfaceReadOnlySpan;
+using Core.InterfacesService.InterfaceReadOnlySpan;
 using Core.Models;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Service.ServiceReadOnly
 {
-    public class GetIpAddresSpanService : IReadOnlySpanLog
+    public class GetIpAddresSpanService : IReadIpOnlySpan
     {
       
         public LogEntity OnlySpan(string line)

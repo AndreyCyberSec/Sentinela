@@ -16,10 +16,10 @@ namespace Application.Service
 {
     public class logAddressService
     {
-        private readonly IReadOnlySpanLog readOnlyIpLog;
-        private readonly IReadOnlySpanLog readOnlyEndpointLog;
+        private readonly IReadEndPointOnlySpanLog readOnlyIpLog;
+        private readonly IReadEndPointOnlySpanLog readOnlyEndpointLog;
 
-        public logAddressService(IReadOnlySpanLog readOnlyIpLog, IReadOnlySpanLog readOnlyEndpointLog)
+        public logAddressService(IReadEndPointOnlySpanLog readOnlyIpLog, IReadEndPointOnlySpanLog readOnlyEndpointLog)
         {
             this.readOnlyIpLog = readOnlyIpLog;
             this.readOnlyEndpointLog = readOnlyEndpointLog;

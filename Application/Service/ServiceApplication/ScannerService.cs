@@ -1,4 +1,6 @@
-﻿using Application.Service.ServiceFile;
+﻿using Application.InterfacesService.InterfaceScanner;
+using Application.Service.ServiceFile;
+using Core.Interfaces.InterfaceFile;
 using Core.Models;
 using Spectre.Console;
 using System;
@@ -7,22 +9,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Service
+namespace Application.Service.ServiceApplication
 {
-    public class ScannerService
+    public class ScannerService : IScannerService
     {
-        private readonly logAddressService addressService;
-        private readonly jsonAddressService jsonService;
-        private readonly ReadFileServiceImpl readFileService;
-        private readonly RegisterFileService registerFileService;
+      
+        private readonly IFileReader readFileService;
+        private readonly IFileRegister registerFileService;
 
-        public ScannerService(logAddressService logAddressService, jsonAddressService jsonAddressService, ReadFileServiceImpl _readFileService, RegisterFileService registerFileService)
+        public ScannerService( IFileReader _readFileService, IFileRegister registerFileService)
         {
-            addressService = logAddressService;
-            jsonService = jsonAddressService;
             readFileService = _readFileService;
             this.registerFileService = registerFileService;
         }
+
         public async Task ScannerToolAsync()
         {
             var toppings = AnsiConsole.Prompt(

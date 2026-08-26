@@ -1,5 +1,7 @@
 ﻿using Application.Service;
 using ClosedXML.Excel;
+using Core.Interfaces.InterfaceFile;
+using Core.InterfacesService.InterfaceReadOnlySpan;
 using Core.Models;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Spectre.Console;
@@ -12,14 +14,18 @@ using System.Threading.Tasks;
 
 namespace Application.Service.ServiceFile
 {
-    public class RegisterFileService
+    public class RegisterFileService : IFileRegister
     {
-       
+        private readonly logAddressService logAddressService;
+        private readonly jsonAddressService _jsonAddressService;
+
+        public RegisterFileService(logAddressService logAddressService, jsonAddressService _jsonAddressService)
+        {
+            this.logAddressService = logAddressService;
+            this._jsonAddressService = _jsonAddressService;
+        }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
-            logAddressService _logAddressService = new logAddressService();
-
-
             var file = fileName;
             try
             {
@@ -38,7 +44,7 @@ namespace Application.Service.ServiceFile
                 {
                     await writer.WriteLineAsync("-----IP ADDRESS----");
                     await writer.WriteLineAsync("IP Address;Date");
-                    foreach (var log in await _logAddressService.GetIpAddressAsync(originalFile))
+                    foreach (var log in await logAddressService.GetIpAddressAsync(originalFile))
                     {
                         var escapedIpAddress = log.Key.EscapeMarkup();
                         var escapedDate = log.Value.EscapeMarkup();
@@ -49,7 +55,7 @@ namespace Application.Service.ServiceFile
 
                     await writer.WriteLineAsync("-----ENDPOINTS----");
                     await writer.WriteLineAsync("Endpoint;Method;Status Code;User Agent");
-                    foreach (var log in await _logAddressService.GetEndPointAsync(originalFile))
+                    foreach (var log in await logAddressService.GetEndPointAsync(originalFile))
                     {
                         var escapedEndpoint = log.Endpoint.EscapeMarkup();
                         var escapedMethod = log.EndpointMethod.EscapeMarkup();
@@ -70,7 +76,6 @@ namespace Application.Service.ServiceFile
         }
         public async Task RegisterJsonAsync(string originalFile, string fileName, string outPutDirectory)
         {
-            jsonAddressService _jsonAddressService = new jsonAddressService();
             if (string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(outPutDirectory))
             {
                 AnsiConsole.MarkupLine("[red] You need insert a name file for continue[/]");

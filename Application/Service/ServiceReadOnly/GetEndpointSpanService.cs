@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Service.ServiceReadOnly
 {
-    public class GetEndpointSpanService : IReadOnlySpanLog
+    public class GetEndpointSpanService : IReadEndPointOnlySpanLog
     {
         public  LogEntity OnlySpan(string line)
         {
