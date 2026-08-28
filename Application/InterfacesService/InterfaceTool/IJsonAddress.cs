@@ -5,10 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.InterfacesService.InterfaceReadOnlySpan
+namespace Application.InterfacesService.InterfaceTool
 {
-    public interface IReadIpOnlySpan
+    public interface IJsonAddress
     {
-        public LogEntity OnlySpan(string line);
+        Task<List<JsonEntity?>> ReadJsonAsync(string filePath);
     }
 }

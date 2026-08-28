@@ -9,10 +9,13 @@ using Application.InterfacesService.InterfaceSystem;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.Extensions.DependencyInjection;
 using Application.InterfacesService.InterfaceScanner;
-using Core.InterfacesService.InterfaceReadOnlySpan;
 using Application.Service.ServiceReadOnly;
 using Core.Interfaces.InterfaceFile;
 using Application.InterfacesService.InterfaceReadOnlySpan;
+using Application.InterfacesService.InterfaceTool;
+using Application.Service.ServiceTool;
+using Application.InterfacesService.InterfaceFind;
+using Application.Service.ServiceFind;
 
 namespace Sentinela
 {
@@ -22,9 +25,12 @@ namespace Sentinela
         {
             var services = new ServiceCollection();
             services.AddSingleton<IFileReader, ReadFileServiceImpl>();
+            services.AddSingleton<IJsonAddress, jsonAddressService>();
+            services.AddSingleton<ILogAddress, logAddressService>();
+            services.AddSingleton<ILogFind, LogFindService>();
             services.AddSingleton<IFileRegister, RegisterFileService>();
-            services.AddSingleton<IReadEndPointOnlySpanLog, GetEndpointSpanService>();
-            services.AddSingleton<IReadIpOnlySpan, GetIpAddresSpanService>();
+            services.AddSingleton<IReadOnlySpan, GetEndpointSpanService>();
+            services.AddSingleton<IReadOnlySpan, GetIpAddresSpanService>();
             services.AddSingleton<IScannerWebService, ScannerWebService>();
             services.AddSingleton<IScannerService, ScannerService>();
             services.AddScoped<ISystem, SystemService>();

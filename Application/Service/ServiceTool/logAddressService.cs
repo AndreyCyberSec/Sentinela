@@ -1,5 +1,7 @@
-﻿using Application.Service.ServiceReadOnly;
-using Core.InterfacesService.InterfaceReadOnlySpan;
+﻿using Application.InterfacesService.InterfaceFind;
+using Application.InterfacesService.InterfaceReadOnlySpan;
+using Application.InterfacesService.InterfaceTool;
+using Application.Service.ServiceReadOnly;
 using Core.Models;
 using DocumentFormat.OpenXml.Bibliography;
 using Spectre.Console;
@@ -12,20 +14,20 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Application.Service
+namespace Application.Service.ServiceTool
 {
-    public class logAddressService
+    public class logAddressService : ILogAddress
     {
-        private readonly IReadEndPointOnlySpanLog readOnlyIpLog;
-        private readonly IReadEndPointOnlySpanLog readOnlyEndpointLog;
+        private readonly IEnumerable<IReadOnlySpan> readOnlySpan;
+        private readonly ILogFind logFind;
 
-        public logAddressService(IReadEndPointOnlySpanLog readOnlyIpLog, IReadEndPointOnlySpanLog readOnlyEndpointLog)
+        public logAddressService(IEnumerable<IReadOnlySpan> readOnlySpan, ILogFind logFind)
         {
-            this.readOnlyIpLog = readOnlyIpLog;
-            this.readOnlyEndpointLog = readOnlyEndpointLog;
+            this.readOnlySpan = readOnlySpan;
+            this.logFind = logFind;
         }
         
-        public async Task<Dictionary<string, string>> GetIpAddressAsync(string filePath)
+        public async Task<Dictionary<string, string?>> GetIpAddressAsync(string filePath)
         {
             var logsLidos = new List<LogEntity>();
             
@@ -39,12 +41,15 @@ namespace Application.Service
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
                         if(string.IsNullOrEmpty(line)) continue;
-                        LogEntity logEntity = readOnlyIpLog.OnlySpan(line);
+                        foreach(var read in readOnlySpan)
+                    {
+                        LogEntity logEntity = read.OnlySpan(line);
                         logsLidos.Add(logEntity);
-                      
+                    }
+                        
                     }
                 
-                Dictionary<string,string> logEntity1 = LogEntity.TopIpaddress(logsLidos);
+                Dictionary<string,string?> logEntity1 = logFind.TopIpaddress(logsLidos);
 
                 return logEntity1;
             }
@@ -70,11 +75,14 @@ namespace Application.Service
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
                         if(string.IsNullOrEmpty(line)) continue;
-                        LogEntity logEntity = readOnlyEndpointLog.OnlySpan(line);
+                    foreach (var read in readOnlySpan)
+                    {
+                        LogEntity logEntity = read.OnlySpan(line);
                         logsLidos.Add(logEntity);
                     }
+                }
                 
-              List<LogEntity> logEntities = LogEntity.TopEndpoint(logsLidos);
+              List<LogEntity> logEntities = logFind.TopEndpoint(logsLidos);
                 return logEntities;
 
             }

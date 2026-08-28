@@ -1,4 +1,4 @@
-﻿
+﻿using Application.InterfacesService.InterfaceTool;
 using Core.Models;
 using Spectre.Console;
 using System;
@@ -9,9 +9,9 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace Application.Service
+namespace Application.Service.ServiceTool
 {
-    public class jsonAddressService
+    public class jsonAddressService : IJsonAddress
     {
         private readonly JsonSerializerOptions optionsJson = new JsonSerializerOptions
         {

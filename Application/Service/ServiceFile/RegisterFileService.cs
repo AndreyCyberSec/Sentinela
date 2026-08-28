@@ -1,7 +1,7 @@
-﻿using Application.Service;
+﻿using Application.InterfacesService.InterfaceTool;
+using Application.Service.ServiceTool;
 using ClosedXML.Excel;
 using Core.Interfaces.InterfaceFile;
-using Core.InterfacesService.InterfaceReadOnlySpan;
 using Core.Models;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Spectre.Console;
@@ -16,10 +16,10 @@ namespace Application.Service.ServiceFile
 {
     public class RegisterFileService : IFileRegister
     {
-        private readonly logAddressService logAddressService;
-        private readonly jsonAddressService _jsonAddressService;
+        private readonly ILogAddress logAddressService;
+        private readonly IJsonAddress _jsonAddressService;
 
-        public RegisterFileService(logAddressService logAddressService, jsonAddressService _jsonAddressService)
+        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;

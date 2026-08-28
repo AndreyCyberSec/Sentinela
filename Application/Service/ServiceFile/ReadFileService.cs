@@ -1,4 +1,5 @@
-﻿using Application.Service;
+﻿using Application.InterfacesService.InterfaceTool;
+using Application.Service.ServiceTool;
 using Core.Interfaces.InterfaceFile;
 using Core.Models;
 using Spectre.Console;
@@ -15,10 +16,10 @@ namespace Application.Service.ServiceFile
 
     public class ReadFileServiceImpl : IFileReader
     {
-        private readonly jsonAddressService _jsonAddressService;
-        private readonly logAddressService _logAddressService;
+        private readonly IJsonAddress _jsonAddressService;
+        private readonly ILogAddress _logAddressService;
 
-        public ReadFileServiceImpl(jsonAddressService _jsonAddressService, logAddressService _logAddressService)
+        public ReadFileServiceImpl(IJsonAddress _jsonAddressService, ILogAddress _logAddressService)
         {
             this._jsonAddressService = _jsonAddressService;
             this._logAddressService = _logAddressService;
@@ -98,7 +99,7 @@ namespace Application.Service.ServiceFile
             }
             AnsiConsole.Write(tableJson);
         }
-
+        
         public async Task ReadLogAsync(string filePath)
         {
             var result = await _logAddressService.GetIpAddressAsync(filePath);
