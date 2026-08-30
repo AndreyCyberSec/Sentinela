@@ -18,11 +18,13 @@ namespace Application.Service.ServiceFile
     {
         private readonly IJsonAddress _jsonAddressService;
         private readonly ILogAddress _logAddressService;
+        private readonly IEgineEnv _egineEnv;
 
-        public ReadFileServiceImpl(IJsonAddress _jsonAddressService, ILogAddress _logAddressService)
+        public ReadFileServiceImpl(IJsonAddress _jsonAddressService, ILogAddress _logAddressService,IEgineEnv _engineEnv)
         {
             this._jsonAddressService = _jsonAddressService;
             this._logAddressService = _logAddressService;
+            this._egineEnv = _engineEnv;
         }
 
         public bool CanReadFile(string filePath)
@@ -139,6 +141,12 @@ namespace Application.Service.ServiceFile
                 tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
+        }
+
+        public async Task ReadEnvAsync(string filePath)
+        {
+            var result = await _egineEnv.GetEnv(filePath);
+            AnsiConsole.MarkupLine($"[green]Env was read with success[/]{filePath}");
         }
     }
 }

@@ -16,6 +16,7 @@ namespace Core.Interfaces.InterfaceFile
         public Task ReadLogAsync(string filePath);
         public Task ReadTxtAsync(string filePath);
         public Task ReadCsvAync(string filePath);
+        public Task ReadEnvAsync(string filePath);
 
     }
 }
