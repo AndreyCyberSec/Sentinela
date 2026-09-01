@@ -3,12 +3,14 @@ using Application.Service.ServiceTool;
 using ClosedXML.Excel;
 using Core.Interfaces.InterfaceFile;
 using Core.Models;
+using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Spectre.Console;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,11 +20,13 @@ namespace Application.Service.ServiceFile
     {
         private readonly ILogAddress logAddressService;
         private readonly IJsonAddress _jsonAddressService;
+        private readonly IEgineEnv _engineEnv;
 
-        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService)
+        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService, IEgineEnv _engineEnv)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;
+            this._engineEnv = _engineEnv;
         }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
@@ -157,6 +161,33 @@ namespace Application.Service.ServiceFile
                 AnsiConsole.MarkupLine($"[red]Error registering the log file path: {ex.Message}[/]");
                 throw;
             }
+        }
+        public async Task RegisterEnvAsync(string filePath, string fileName, string password, string? outPutDirectory = null)
+        {
+          
+            if (!File.Exists(filePath))
+                throw new FileNotFoundException($"Arquivo .env não encontrado: {filePath}");
+
+            if (string.IsNullOrWhiteSpace(fileName))
+                throw new ArgumentException("O nome do arquivo de saída não pode ser vazio.", nameof(fileName));
+
+          
+            if (!fileName.EndsWith(".vault", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName += ".vault";
+            }
+            var getText = await _engineEnv.GetEnv(filePath);
+            byte[] textPayload = _engineEnv.Encrypt(getText, password);
+            string targetDirectory = !string.IsNullOrWhiteSpace(outPutDirectory)
+                ? outPutDirectory
+                : (Path.GetDirectoryName(filePath) ?? AppContext.BaseDirectory);
+            if (!Directory.Exists(targetDirectory))
+            {
+                Directory.CreateDirectory(targetDirectory);
+            }
+            string fullOutputPath = Path.Combine(targetDirectory, fileName);
+            await File.WriteAllBytesAsync(fullOutputPath, textPayload);
+
         }
      }
 }

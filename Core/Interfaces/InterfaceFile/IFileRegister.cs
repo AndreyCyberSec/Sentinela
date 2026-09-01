@@ -10,5 +10,7 @@ namespace Core.Interfaces.InterfaceFile
     {
       public Task RegisterLogAsync(string fileName, string filePath, string originalFile);
       public Task RegisterJsonAsync(string originalFile, string fileName, string outPutDirectory);
+
+        public Task RegisterEnvAsync(string filePath,string fileName,string password, string? outPutDirectory = null);
     }
 }

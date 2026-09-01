@@ -15,6 +15,8 @@ namespace Application.InterfacesService.InterfaceTool
         
        public byte[] NewPassword(string password, byte[] salt);
 
+       
+
 
     }
 }

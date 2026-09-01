@@ -143,10 +143,6 @@ namespace Application.Service.ServiceFile
             AnsiConsole.Write(tableEndPoint);
         }
 
-        public async Task ReadEnvAsync(string filePath)
-        {
-            var result = await _egineEnv.GetEnv(filePath);
-            AnsiConsole.MarkupLine($"[green]Env was read with success[/]{filePath}");
-        }
+       
     }
 }
