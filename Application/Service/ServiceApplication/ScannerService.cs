@@ -37,7 +37,8 @@ namespace Application.Service.ServiceApplication
                 switch (toppings)
                 {
                     case var t when t.Contains("Sentinela-Analyzer-Log"):
-                        AnsiConsole.MarkupLine("[green]You selected Sentinela-Analyzer-Log\nThis tool select the top 10 IP with date, endpoint,method" +
+                        AnsiConsole.MarkupLine(@"[green]You selected Sentinela-Analyzer-Log 
+                                                     This tool select the top 10 IP with date, endpoint,method" +
                             "status of code and user agent[/]");
                         await AnsiConsole.Status()
                               .Spinner(Spinner.Known.Binary)
@@ -84,6 +85,39 @@ namespace Application.Service.ServiceApplication
 
                     case var t when t.Contains("Management-.Env"):
                         AnsiConsole.MarkupLine("[green]You selected Management-.Env[/]");
+                        await AnsiConsole.Status()
+                             .Spinner(Spinner.Known.Binary)
+                             .StartAsync("Loading...", async ctx =>
+                             {
+                                 await Task.Delay(500);
+                             });
+
+                        var path = await AnsiConsole.PromptAsync(
+                                new TextPrompt<string>("Enter the [green]file path[/]:")
+                                         .Validate(filePath =>
+                                         {
+                                           var clean = filePath.Trim('\'', '"', ' ');
+                                           return File.Exists(clean)
+                                             ? ValidationResult.Success()
+                                         : ValidationResult.Error("[red]File not found. Please verify the path.[/]");
+                                          }));
+                        var RegisterPath = await AnsiConsole.AskAsync<string>("Enter the [green]file path for register[/]:");
+                        var NameFile = await AnsiConsole.AskAsync<string>("Enter the [green]file name[/]:");
+                        var password = await AnsiConsole.PromptAsync(
+                            new TextPrompt<string>("Enter the [green]password[/]:")
+                                .PromptStyle("red")
+                                .Secret());
+                        var  formatedPath = path.Trim('\'', '"', ' ');
+                        var formatedRegisterPath = RegisterPath.Trim('\'', '"', ' ');
+                        var formatedNameFile = NameFile.Trim('\'', '"', ' ');
+                        await AnsiConsole.Status()
+                              .Spinner(Spinner.Known.Binary)
+                              .StartAsync("Encrypting and generating vault...", async ctx =>
+                                   {
+                                          await registerFileService.RegisterEnvAsync(formatedPath, formatedNameFile, password, formatedRegisterPath);
+                                   });
+                        AnsiConsole.MarkupLine("[bold green]Vault created successfully![/]");
+
                         break;
                     case var t when t.Contains("Net-WatchService"):
                         AnsiConsole.MarkupLine("[green]You selected Net-WatchService[/]");
