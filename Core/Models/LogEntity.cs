@@ -61,31 +61,9 @@ namespace Core.Models
             EndpointStatusCode = endpointStatusCode;
             UserAgent = userAgent;
         }
-        public static Dictionary<string,string> TopIpaddress(List<LogEntity> logsLidos)
-        {
-            var topAddresses = logsLidos
-                   .GroupBy(kvp => kvp.IpAddress)
-                   .OrderByDescending(x => x.Count())
-                   .Take(10)
-                   .ToDictionary(
-                       group => group.Key,
-                       group => group.Max(x => x.Date)
-                   );
-            return topAddresses;
+        
 
-        }
-
-        public static List<LogEntity> TopEndpoint(List<LogEntity> logsLidos)
-        {
-            var topEndpoints = logsLidos
-                   .GroupBy(kvp => kvp.GetEndpoints())
-                   .OrderByDescending(x => x.Count())
-                   .Take(10)
-                   .SelectMany(group => group)
-                  .ToList();
-
-            return topEndpoints;
-        }
+       
 
         
     }
