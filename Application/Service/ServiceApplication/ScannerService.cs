@@ -85,40 +85,76 @@ namespace Application.Service.ServiceApplication
 
                     case var t when t.Contains("Management-.Env"):
                         AnsiConsole.MarkupLine("[green]You selected Management-.Env[/]");
-                        await AnsiConsole.Status()
-                             .Spinner(Spinner.Known.Binary)
-                             .StartAsync("Loading...", async ctx =>
-                             {
-                                 await Task.Delay(500);
-                             });
+                        var functionEnv = AnsiConsole.Prompt(new MultiSelectionPrompt<string>()
+                            .Title("Do you want to encrypt or decrypt the log file path?")
+                            .AddChoices(new[] { "Encrypt", "Decrypt" }));
+                        if (functionEnv.Contains("Decrypt"))
+                        {
+                            var envPath = await AnsiConsole.AskAsync<string>("Enter the [green]file path for decrypt[/]:");
+                            var envPassword = await AnsiConsole.PromptAsync(
+                                new TextPrompt<string>("Enter the [green]password[/]:")
+                                    .PromptStyle("red")
+                                    .Secret());
+                            var formatedEnvPath = envPath.Trim('\'', '"', ' ');
+                            await AnsiConsole.Status()
+                                  .Spinner(Spinner.Known.Binary)
+                                  .StartAsync("Decrypting vault...", async ctx =>
+                                  {
+                                      await Task.Delay(100);
+                                  });
+                            var envDecrypted = await registerFileService.DecryptEnvAsync(formatedEnvPath, envPassword);
+                            await AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Binary)
+                            .StartAsync("Loading...", async ctx =>
+                            {
+                                await Task.Delay(100);
+                            });
+                            var panel = new Panel(envDecrypted.EscapeMarkup())
+                            {
+                                Header = new PanelHeader("[green]Vault Decrypted[/]"),
+                                Border = BoxBorder.Rounded,
+                                Padding = new Padding(1, 1, 1, 1),
+                                Expand = true
+                            };
+                            AnsiConsole.Write(panel);
+                        }
+                        else
+                        {
+                            await AnsiConsole.Status()
+                            .Spinner(Spinner.Known.Binary)
+                            .StartAsync("Loading...", async ctx =>
+                            {
+                                await Task.Delay(500);
+                            });
 
-                        var path = await AnsiConsole.PromptAsync(
-                                new TextPrompt<string>("Enter the [green]file path[/]:")
-                                         .Validate(filePath =>
-                                         {
-                                           var clean = filePath.Trim('\'', '"', ' ');
-                                           return File.Exists(clean)
-                                             ? ValidationResult.Success()
-                                         : ValidationResult.Error("[red]File not found. Please verify the path.[/]");
-                                          }));
-                        var RegisterPath = await AnsiConsole.AskAsync<string>("Enter the [green]file path for register[/]:");
-                        var NameFile = await AnsiConsole.AskAsync<string>("Enter the [green]file name[/]:");
-                        var password = await AnsiConsole.PromptAsync(
-                            new TextPrompt<string>("Enter the [green]password[/]:")
-                                .PromptStyle("red")
-                                .Secret());
-                        var  formatedPath = path.Trim('\'', '"', ' ');
-                        var formatedRegisterPath = RegisterPath.Trim('\'', '"', ' ');
-                        var formatedNameFile = NameFile.Trim('\'', '"', ' ');
-                        await AnsiConsole.Status()
-                              .Spinner(Spinner.Known.Binary)
-                              .StartAsync("Encrypting and generating vault...", async ctx =>
-                                   {
-                                          await registerFileService.RegisterEnvAsync(formatedPath, formatedNameFile, password, formatedRegisterPath);
-                                   });
-                        AnsiConsole.MarkupLine("[bold green]Vault created successfully![/]");
+                            var path = await AnsiConsole.PromptAsync(
+                                    new TextPrompt<string>("Enter the [green]file path[/]:")
+                                             .Validate(filePath =>
+                                             {
+                                                 var clean = filePath.Trim('\'', '"', ' ');
+                                                 return File.Exists(clean)
+                                               ? ValidationResult.Success()
+                                           : ValidationResult.Error("[red]File not found. Please verify the path.[/]");
+                                             }));
+                            var RegisterPath = await AnsiConsole.AskAsync<string>("Enter the [green]file path for register[/]:");
+                            var NameFile = await AnsiConsole.AskAsync<string>("Enter the [green]file name[/]:");
+                            var password = await AnsiConsole.PromptAsync(
+                                new TextPrompt<string>("Enter the [green]password[/]:")
+                                    .PromptStyle("red")
+                                    .Secret());
+                            var formatedPath = path.Trim('\'', '"', ' ');
+                            var formatedRegisterPath = RegisterPath.Trim('\'', '"', ' ');
+                            var formatedNameFile = NameFile.Trim('\'', '"', ' ');
+                            await AnsiConsole.Status()
+                                  .Spinner(Spinner.Known.Binary)
+                                  .StartAsync("Encrypting and generating vault...", async ctx =>
+                                  {
+                                      await registerFileService.RegisterEnvAsync(formatedPath, formatedNameFile, password, formatedRegisterPath);
+                                  });
+                            AnsiConsole.MarkupLine("[bold green]Vault created successfully![/]");
+                        }
 
-                        break;
+                            break;
                     case var t when t.Contains("Net-WatchService"):
                         AnsiConsole.MarkupLine("[green]You selected Net-WatchService[/]");
                         break;

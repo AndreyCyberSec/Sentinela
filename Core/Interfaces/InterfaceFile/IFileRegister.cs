@@ -12,5 +12,6 @@ namespace Core.Interfaces.InterfaceFile
       public Task RegisterJsonAsync(string originalFile, string fileName, string outPutDirectory);
 
         public Task RegisterEnvAsync(string filePath,string fileName,string password, string? outPutDirectory = null);
+        public Task<string> DecryptEnvAsync(string fileEnv, string password);
     }
 }

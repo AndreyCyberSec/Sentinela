@@ -142,7 +142,5 @@ namespace Application.Service.ServiceFile
             }
             AnsiConsole.Write(tableEndPoint);
         }
-
-       
     }
 }

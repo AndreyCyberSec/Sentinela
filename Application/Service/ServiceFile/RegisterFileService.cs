@@ -189,5 +189,21 @@ namespace Application.Service.ServiceFile
             await File.WriteAllBytesAsync(fullOutputPath, textPayload);
 
         }
-     }
+
+        public async Task<string> DecryptEnvAsync(string fileEnv, string password)
+        {
+            if(string.IsNullOrEmpty(fileEnv) || string.IsNullOrEmpty(password))
+            {
+                AnsiConsole.MarkupLine("[red]You need insert a file and a password for decrypt.[/]");
+                throw new ArgumentException("File and password must be provided for decryption.");
+            }
+            if (!File.Exists(fileEnv))
+                throw new FileNotFoundException($"Vault file not found: {fileEnv}");
+            if(fileEnv.EndsWith(".vault", StringComparison.OrdinalIgnoreCase) == false)
+                throw new ArgumentException("The file must have a .vault extension.", nameof(fileEnv));
+
+            byte[] encryptedBytes = await File.ReadAllBytesAsync(fileEnv);
+            return _engineEnv.Decrypt(encryptedBytes, password);
+        }
+    }
 }
