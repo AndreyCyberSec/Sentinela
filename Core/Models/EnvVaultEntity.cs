@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.Models
 {
-    public class EnvVaultEntity
+    public record EnvVaultEntity
     {
-        public string Text { get; set; }
-        public DateOnly Created { get; set; }
+        public string Text { get; init; }
+        public DateOnly Created { get; init; }
 
         public EnvVaultEntity() { }
 
