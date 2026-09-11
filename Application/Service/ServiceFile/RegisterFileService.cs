@@ -21,12 +21,14 @@ namespace Application.Service.ServiceFile
         private readonly ILogAddress logAddressService;
         private readonly IJsonAddress _jsonAddressService;
         private readonly IEgineEnv _engineEnv;
+        private readonly INetScannerService netScannerService;
 
-        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService, IEgineEnv _engineEnv)
+        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService, IEgineEnv _engineEnv, INetScannerService netScannerService)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;
             this._engineEnv = _engineEnv;
+            this.netScannerService = netScannerService;
         }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
@@ -204,6 +206,30 @@ namespace Application.Service.ServiceFile
 
             byte[] encryptedBytes = await File.ReadAllBytesAsync(fileEnv);
             return _engineEnv.Decrypt(encryptedBytes, password);
+        }
+
+        public async Task CheckPortResult(string hostname, int port, string? outPutDirectory = null)
+        {
+            if(string.IsNullOrEmpty(hostname))
+                throw new ArgumentException("Hostname must be provided.", nameof(hostname));
+            if(port <= 0 || port > 65535)
+                throw new ArgumentOutOfRangeException(nameof(port), "Port must be greater than 1 or less than 65535");
+
+            Directory.CreateDirectory(outPutDirectory ?? AppContext.BaseDirectory);
+            var fileName = $"PortCheck_{hostname}_{port}.txt";
+            var fullPath = Path.Combine(outPutDirectory ?? AppContext.BaseDirectory, fileName);
+
+            var targetHost = await netScannerService.PortCheck(hostname, port,timeOutMs:2000);
+            string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC");
+            string status = targetHost.IsOpen ? "OPEN" : "CLOSED";
+            string diagnostico = !targetHost.IsOpen && !string.IsNullOrEmpty(targetHost.ErrorMessage)
+        ? $" | Motivo: {targetHost.ErrorMessage}"
+        : string.Empty;
+
+            await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
+            
+            await writer.WriteLineAsync($"[{timestamp}] {targetHost.HostName}:{targetHost.Port} => {status} | Latency: {targetHost.LatencyMs} ms{diagnostico}");
+
         }
     }
 }

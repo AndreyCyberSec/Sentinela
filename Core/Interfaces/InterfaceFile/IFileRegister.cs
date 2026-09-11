@@ -13,6 +13,6 @@ namespace Core.Interfaces.InterfaceFile
 
         public Task RegisterEnvAsync(string filePath,string fileName,string password, string? outPutDirectory = null);
         public Task<string> DecryptEnvAsync(string fileEnv, string password);
-        public Task<string> CheckPortResult(string hostname, int port, string? outPutDirectory = null);
+        public Task CheckPortResult(string hostname, int port, string? outPutDirectory = null);
     }
 }

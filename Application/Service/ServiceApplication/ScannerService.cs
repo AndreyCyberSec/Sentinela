@@ -157,6 +157,40 @@ namespace Application.Service.ServiceApplication
                             break;
                     case var t when t.Contains("Net-WatchService"):
                         AnsiConsole.MarkupLine("[green]You selected Net-WatchService[/]");
+
+                        var targetHost = await AnsiConsole.PromptAsync(
+                            new TextPrompt<string>("Enter the [green]hostname or IP address[/]:")
+                                .Validate(host =>
+                                {
+                                    return !string.IsNullOrWhiteSpace(host)
+                                        ? ValidationResult.Success()
+                                        : ValidationResult.Error("[red]Hostname cannot be empty.[/]");
+                                }));
+
+                        var targetPort = await AnsiConsole.PromptAsync(
+                            new TextPrompt<int>("Enter the [green]port number[/]:")
+                                .Validate(port =>
+                                {
+                                    return port > 0 && port <= 65535
+                                        ? ValidationResult.Success()
+                                        : ValidationResult.Error("[red]Port must be between 1 and 65535.[/]");
+                                }));
+
+                        var outputDirectory = await AnsiConsole.PromptAsync(
+                            new TextPrompt<string>("Enter the [green]output directory[/] or Enter  for directory default").AllowEmpty());
+
+                        var hostSanitizado = targetHost.Trim('\'', '"', ' ');
+                        var dirSanitizado = string.IsNullOrWhiteSpace(outputDirectory) ? null : outputDirectory.Trim('\'', '"', ' ');
+
+                        await AnsiConsole.Status()
+                                .Spinner(Spinner.Known.Dots)
+                                .StartAsync($"Escaneando {hostSanitizado}:{targetPort}...", async ctx =>
+                                {
+                                    await registerFileService.CheckPortResult(hostSanitizado, targetPort, dirSanitizado);
+                                });
+
+                        AnsiConsole.MarkupLine($"[bold green]Varredura finalizada e registrada com sucesso![/]");
+
                         break;
                     case var t when t.Contains("Register-Dns"):
                         AnsiConsole.MarkupLine("[green]You selected Register-Dns[/]");
