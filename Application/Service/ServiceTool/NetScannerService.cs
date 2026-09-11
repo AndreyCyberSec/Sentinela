@@ -1,28 +1,82 @@
 ﻿using Application.InterfacesService.InterfaceTool;
 using Core.Models;
-using DocumentFormat.OpenXml.Bibliography;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Service.ServiceTool
 {
     public class NetScannerService : INetScannerService
     {
-        public async Task<NetScannerEntity> PortCheck(string hostName, int port, int timeOutMs, CancellationToken cancellationToken= default)
+        public async Task<IReadOnlyList<NetScannerEntity>> CheckAllPortsAsync(IEnumerable<(string Host, int Port)> targets, int timeoutMs = 2000, CancellationToken cancellationToken = default)
         {
-            var ipEndpoint = new IPEndPoint(IPAddress.Parse(hostName), port);
-            using TcpClient client = new();
-            await client.ConnectAsync(ipEndpoint.Address, ipEndpoint.Port, cancellationToken);
-            await using NetworkStream stream = client.GetStream();
-            var buffer = new byte[1];
-            int receivedBytes = await stream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
-            var message = receivedBytes > 0 ? Encoding.UTF8.GetString(buffer, 0, receivedBytes) : string.Empty;
-            Console.WriteLine($"Received message: {message}");
+            // 1. Cria a coleção de tarefas em voo (sem usar await aqui!)
+            // Cada item do Select inicia a tarefa imediatamente
+            var tasks = targets.Select(target =>
+                PortCheck(target.Host, target.Port, timeoutMs, cancellationToken));
+
+            // 2. Task.WhenAll aguarda todas completarem em paralelo
+            // e empacota todos os retornos em um array NetScannerEntity[]
+            NetScannerEntity[] results = await Task.WhenAll(tasks);
+
+            return results;
+        }
+
+        public async Task<NetScannerEntity> PortCheck(
+            string host,
+            int port,
+            int timeoutMs = 2000,
+            CancellationToken cancellationToken = default)
+        {
+            var stopwatch = Stopwatch.StartNew();
+
+            //token de cancelamento baseado no timeout
+            using var timeoutCts = new CancellationTokenSource(timeoutMs);
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(timeoutCts.Token, cancellationToken);
+            using var client = new TcpClient();
+
+            try
+            {
+                //Handshake TCP não bloqueante gerenciado pelo kernel do SO
+                await client.ConnectAsync(host, port, linkedCts.Token);
+
+                return new NetScannerEntity(
+                    host,
+                    port,
+                    true,
+                    stopwatch.ElapsedMilliseconds,
+                    errorMessage: null);
+            }
+            catch (OperationCanceledException)
+            {
+                string motivo = timeoutCts.IsCancellationRequested
+                    ? "Timeout (Sem resposta / Firewall)"
+                    : "Cancelado pelo operador";
+
+                return new NetScannerEntity(
+                    host,
+                    port,
+                    false,
+                    stopwatch.ElapsedMilliseconds,
+                    motivo);
+            }
+            catch (SocketException ex)
+            {
+                //Exceção disparada quando a porta responde com RST (Recusada) ou host inacessível
+                return new NetScannerEntity(
+                    host,
+                    port,
+                    false,
+                    stopwatch.ElapsedMilliseconds,
+                    $"Recusada ({ex.SocketErrorCode})");
+            }
+            finally
+            {
+                //Garante a parada do cronômetro da CPU em qualquer situação
+                stopwatch.Stop();
+            }
         }
     }
 }
