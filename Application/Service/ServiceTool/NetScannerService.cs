@@ -1,4 +1,6 @@
-﻿using Application.InterfacesService.InterfaceTool;
+﻿using Application.InterfacesService.InterfaceFind;
+using Application.InterfacesService.InterfaceReadOnlySpan;
+using Application.InterfacesService.InterfaceTool;
 using Core.Models;
 using System;
 using System.Diagnostics;
@@ -10,6 +12,14 @@ namespace Application.Service.ServiceTool
 {
     public class NetScannerService : INetScannerService
     {
+        private readonly IEnumerable<IReadOnlySpanNet> readOnlySpanNet;
+        private readonly ILogFind logFind;
+
+        public NetScannerService(IEnumerable<IReadOnlySpanNet> readOnlySpanNet, ILogFind logFind)
+        {
+            this.readOnlySpanNet = readOnlySpanNet;
+            this.logFind = logFind;
+        }
         public async Task<IReadOnlyList<NetScannerEntity>> CheckAllPortsAsync(IEnumerable<(string Host, int Port)> targets, int timeoutMs = 2000, CancellationToken cancellationToken = default)
         {
             // 1. Cria a coleção de tarefas em voo (sem usar await aqui!)
@@ -22,6 +32,36 @@ namespace Application.Service.ServiceTool
             NetScannerEntity[] results = await Task.WhenAll(tasks);
 
             return results;
+        }
+
+        public async Task<List<NetScannerEntity>> GetNetScanner(string filePath)
+        {
+            var results = new List<NetScannerEntity>();
+            try
+            {
+                await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read,
+                        FileShare.ReadWrite, bufferSize: 4096, useAsync: true);
+                using var reader = new StreamReader(fileStream);
+                string? line;
+                while((line = await reader.ReadLineAsync()) != null)
+                {
+                    if (string.IsNullOrEmpty(line)) continue;
+                    foreach (var read in readOnlySpanNet)
+                    {
+                        NetScannerEntity netEntity = read.OnlySpan(line);
+                        results.Add(netEntity);
+                    }
+                }
+                List<NetScannerEntity> netEntities = logFind.TopScan(results);
+
+                return netEntities;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao ler o arquivo: {ex.Message}");
+                throw;
+            }
+
         }
 
         public async Task<NetScannerEntity> PortCheck(

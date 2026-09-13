@@ -19,12 +19,14 @@ namespace Application.Service.ServiceFile
         private readonly IJsonAddress _jsonAddressService;
         private readonly ILogAddress _logAddressService;
         private readonly IEgineEnv _egineEnv;
+        private readonly INetScannerService _netScannerService;
 
-        public ReadFileServiceImpl(IJsonAddress _jsonAddressService, ILogAddress _logAddressService,IEgineEnv _engineEnv)
+        public ReadFileServiceImpl(IJsonAddress _jsonAddressService, ILogAddress _logAddressService, IEgineEnv _engineEnv, INetScannerService _netScannerService)
         {
             this._jsonAddressService = _jsonAddressService;
             this._logAddressService = _logAddressService;
             this._egineEnv = _engineEnv;
+            this._netScannerService = _netScannerService;
         }
 
         public bool CanReadFile(string filePath)
@@ -141,6 +143,19 @@ namespace Application.Service.ServiceFile
                 tableEndPoint.AddRow($"[white]{endpoint.Endpoint?.EscapeMarkup()}[/]", $"[green]{endpoint.EndpointMethod?.EscapeMarkup()}[/]", $"[blue]{endpoint.EndpointStatusCode?.EscapeMarkup()}[/]", $"[yellow]{endpoint.UserAgent?.EscapeMarkup()}[/]");
             }
             AnsiConsole.Write(tableEndPoint);
+        }
+
+        public async Task ReadResultNetScanner(string filePath)
+        {
+            var resutlScan = await _netScannerService.GetNetScanner(filePath);
+            var tableScan = new Table();
+            tableScan.AddColumn("[bold yellow]ResponseTime[/]").AddColumns("[bold green]HostName[/]")
+                .AddColumns("[bold blue]IsOpen[/]").AddColumns("[bold white]Latency[/]");
+            foreach(NetScannerEntity scannerEntity in resutlScan)
+            {
+                tableScan.AddRow($"[yellow]{scannerEntity.TimeStamp}[/]", $"[green]{scannerEntity.HostName}[/]", $"[blue]{scannerEntity.IsOpen}[/]", $"[white]{scannerEntity.LatencyMs}[/]");
+            }
+            AnsiConsole.Write(tableScan);
         }
     }
 }

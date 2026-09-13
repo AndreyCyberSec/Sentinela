@@ -31,6 +31,7 @@ namespace Sentinela
             services.AddSingleton<IFileRegister, RegisterFileService>();
             services.AddSingleton<IReadOnlySpan, GetEndpointSpanService>();
             services.AddSingleton<IReadOnlySpan, GetIpAddresSpanService>();
+            services.AddSingleton<IReadOnlySpanNet, GetNetScanSpanService>();
             services.AddSingleton<IEgineEnv, EngineEnvService>();
             services.AddSingleton<INetScannerService, NetScannerService>();
             services.AddSingleton<IScannerWebService, ScannerWebService>();

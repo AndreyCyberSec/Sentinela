@@ -12,5 +12,7 @@ namespace Application.InterfacesService.InterfaceFind
         public  Dictionary<string, string?> TopIpaddress(List<LogEntity> logsLidos);
 
         public List<LogEntity> TopEndpoint(List<LogEntity> logsLidos);
+
+        public List<NetScannerEntity> TopScan(List<NetScannerEntity> netScanners);
     }
 }

@@ -15,5 +15,7 @@ namespace Application.InterfacesService.InterfaceTool
             IEnumerable<(string Host, int Port)> targets,
             int timeoutMs = 2000,
             CancellationToken cancellationToken = default);
+
+        public Task<List<NetScannerEntity>> GetNetScanner(string filePath);
     }
 }

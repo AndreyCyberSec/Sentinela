@@ -35,5 +35,20 @@ namespace Application.Service.ServiceFind
                   );
             return  topAddresses;
         }
+
+        public List<NetScannerEntity> TopScan(List<NetScannerEntity> netScanners)
+        {
+            var topScan = netScanners
+                .GroupBy(x=>x.GetScan())
+                .OrderByDescending(x => x.Count())
+                .Take(10)
+                .SelectMany(hostname=>hostname)
+                .ToList();
+
+            return topScan;
+                
+        }
+
+      
     }
 }
