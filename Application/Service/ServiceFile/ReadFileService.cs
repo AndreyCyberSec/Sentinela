@@ -145,17 +145,6 @@ namespace Application.Service.ServiceFile
             AnsiConsole.Write(tableEndPoint);
         }
 
-        public async Task ReadResultNetScanner(string filePath)
-        {
-            var resutlScan = await _netScannerService.GetNetScanner(filePath);
-            var tableScan = new Table();
-            tableScan.AddColumn("[bold yellow]ResponseTime[/]").AddColumns("[bold green]HostName[/]")
-                .AddColumns("[bold blue]IsOpen[/]").AddColumns("[bold white]Latency[/]");
-            foreach(NetScannerEntity scannerEntity in resutlScan)
-            {
-                tableScan.AddRow($"[yellow]{scannerEntity.TimeStamp}[/]", $"[green]{scannerEntity.HostName}[/]", $"[blue]{scannerEntity.IsOpen}[/]", $"[white]{scannerEntity.LatencyMs}[/]");
-            }
-            AnsiConsole.Write(tableScan);
-        }
+       
     }
 }

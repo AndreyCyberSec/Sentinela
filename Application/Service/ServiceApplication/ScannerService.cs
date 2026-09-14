@@ -188,7 +188,7 @@ namespace Application.Service.ServiceApplication
                                 .StartAsync($"Escaneando {hostSanitizado}:{targetPort}...", async ctx =>
                                 {
                                     await registerFileService.CheckPortResult(hostSanitizado, targetPort, dirSanitizado);
-                                    await readFileService.ReadResultNetScanner(dirSanitizado);
+                                    
                                 });
 
                         AnsiConsole.MarkupLine($"[bold green]Varredura finalizada e registrada com sucesso![/]");

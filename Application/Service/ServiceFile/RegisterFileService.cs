@@ -225,10 +225,29 @@ namespace Application.Service.ServiceFile
             string diagnostico = !targetHost.IsOpen && !string.IsNullOrEmpty(targetHost.ErrorMessage)
         ? $" | Motivo: {targetHost.ErrorMessage}"
         : string.Empty;
+            {
+                await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
+                await writer.WriteLineAsync($"[{timestamp}] {targetHost.HostName}:{targetHost.Port} => {status} | Latency: {targetHost.LatencyMs} ms{diagnostico}");
+            }
 
-            await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
-            
-            await writer.WriteLineAsync($"[{timestamp}] {targetHost.HostName}:{targetHost.Port} => {status} | Latency: {targetHost.LatencyMs} ms{diagnostico}");
+            var tableScan = new Spectre.Console.Table()
+        .Border(TableBorder.Rounded)
+        .AddColumns(
+            "[bold yellow]TimeStamp[/]",
+            "[bold green]HostName[/]",
+            "[bold blue]IsOpen[/]",
+            "[bold white]Latency (ms)[/]"
+        );
+
+            string statusColor = targetHost.IsOpen ? "[green]OPEN[/]" : "[red]CLOSED[/]";
+            tableScan.AddRow(
+                $"[yellow]{timestamp}[/]",
+                $"[green]{targetHost.HostName}:{targetHost.Port}[/]",
+                statusColor,
+                $"[white]{targetHost.LatencyMs}[/]"
+            );
+
+            AnsiConsole.Write(tableScan);
 
         }
     }
