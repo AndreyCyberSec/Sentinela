@@ -16,6 +16,8 @@ namespace Application.InterfacesService.InterfaceTool
             int timeoutMs = 2000,
             CancellationToken cancellationToken = default);
 
+        
+
         public Task<List<NetScannerEntity>> GetNetScanner(string filePath);
     }
 }

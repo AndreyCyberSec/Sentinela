@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,6 @@ namespace Core.Interfaces.InterfaceFile
 
         public Task RegisterEnvAsync(string filePath,string fileName,string password, string? outPutDirectory = null);
         public Task<string> DecryptEnvAsync(string fileEnv, string password);
-        public Task CheckPortResult(string hostname, int port, string? outPutDirectory = null);
+        public Task CheckPortResult(IReadOnlyList<NetScannerEntity> scanResults, string? outPutDirectory = null);
     }
 }

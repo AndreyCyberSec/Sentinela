@@ -1,4 +1,5 @@
 ﻿using Application.InterfacesService.InterfaceScanner;
+using Application.InterfacesService.InterfaceTool;
 using Application.Service.ServiceFile;
 using Core.Interfaces.InterfaceFile;
 using Core.Models;
@@ -16,11 +17,13 @@ namespace Application.Service.ServiceApplication
       
         private readonly IFileReader readFileService;
         private readonly IFileRegister registerFileService;
+        private readonly INetScannerService netScannerService;
 
-        public ScannerService( IFileReader _readFileService, IFileRegister registerFileService)
+        public ScannerService( IFileReader _readFileService, IFileRegister registerFileService, INetScannerService _netScannerService)
         {
             readFileService = _readFileService;
             this.registerFileService = registerFileService;
+            netScannerService = _netScannerService;
         }
 
         public async Task ScannerToolAsync()
@@ -158,38 +161,80 @@ namespace Application.Service.ServiceApplication
                             break;
                     case var t when t.Contains("Net-WatchService"):
                         AnsiConsole.MarkupLine("[green]You selected Net-WatchService[/]");
-
-                        var targetHost = await AnsiConsole.PromptAsync(
-                            new TextPrompt<string>("Enter the [green]hostname or IP address[/]:")
-                                .Validate(host =>
+                       
+                        var quantidade = await AnsiConsole.PromptAsync(
+                            new TextPrompt<int>("Enter the [green]number of scans[/]:")
+                                .Validate(num =>
                                 {
-                                    return !string.IsNullOrWhiteSpace(host)
+                                    return num > 0
                                         ? ValidationResult.Success()
-                                        : ValidationResult.Error("[red]Hostname cannot be empty.[/]");
+                                        : ValidationResult.Error("[red]Number of scans must be greater than 0.[/]");
                                 }));
+                        var targets = new List<(string Host, int Port)>();
+                        for (int i = 0; i < quantidade; i++)
+                        {
+                            var targetHost = await AnsiConsole.PromptAsync(
+                           new TextPrompt<string>("Enter the [green]hostname or IP address[/]:")
+                               .Validate(host =>
+                               {
+                                   return !string.IsNullOrWhiteSpace(host)
+                                       ? ValidationResult.Success()
+                                       : ValidationResult.Error("[red]Hostname cannot be empty.[/]");
+                               }));
 
-                        var targetPort = await AnsiConsole.PromptAsync(
-                            new TextPrompt<int>("Enter the [green]port number[/]:")
-                                .Validate(port =>
-                                {
-                                    return port > 0 && port <= 65535
-                                        ? ValidationResult.Success()
-                                        : ValidationResult.Error("[red]Port must be between 1 and 65535.[/]");
-                                }));
+                            var targetPort = await AnsiConsole.PromptAsync(
+                                new TextPrompt<int>("Enter the [green]port number[/]:")
+                                    .Validate(port =>
+                                    {
+                                        return port > 0 && port <= 65535
+                                            ? ValidationResult.Success()
+                                            : ValidationResult.Error("[red]Port must be between 1 and 65535.[/]");
+                                    }));
+                            var hostSanitizado = targetHost.Trim('\'', '"', ' ');
+                            targets.Add((hostSanitizado, targetPort));
+                        }
+                       
 
                         var outputDirectory = await AnsiConsole.PromptAsync(
                             new TextPrompt<string>("Enter the [green]output directory[/] or Enter  for directory default").AllowEmpty());
 
-                        var hostSanitizado = targetHost.Trim('\'', '"', ' ');
                         var dirSanitizado = string.IsNullOrWhiteSpace(outputDirectory) ? null : outputDirectory.Trim('\'', '"', ' ');
+
+                        IReadOnlyList<NetScannerEntity> scanResults = Array.Empty<NetScannerEntity>();
 
                         await AnsiConsole.Status()
                                 .Spinner(Spinner.Known.Dots)
-                                .StartAsync($"Escaneando {hostSanitizado}:{targetPort}...", async ctx =>
+                                .StartAsync($"Escaneando {targets.Count} alvos...", async ctx =>
                                 {
-                                    await registerFileService.CheckPortResult(hostSanitizado, targetPort, dirSanitizado);
+                                    scanResults = await netScannerService.CheckAllPortsAsync(targets, timeoutMs: 2000);
+                                    await registerFileService.CheckPortResult(scanResults, dirSanitizado);
                                     
                                 });
+                                       var tableScan = new Table()
+                                                .Border(TableBorder.Rounded)
+                                                 .AddColumns(
+                                                     "[bold yellow]TimeStamp[/]",
+                                                     "[bold green]HostName[/]",
+                                                     "[bold blue]IsOpen[/]",
+                                                     "[bold white]Latency (ms)[/]",
+                                                     "[bold red]Diagnóstico[/]"
+                                                 );
+
+                        foreach (var res in scanResults)
+                        {
+                            string status = res.IsOpen ? "[green]OPEN[/]" : "[red]CLOSED[/]";
+                            string latency = res.IsOpen ? $"{res.LatencyMs} ms" : "-";
+                            string diagnostico = res.ErrorMessage ?? "[green]SYN-ACK OK[/]";
+
+                            tableScan.AddRow(
+                                $"[white]{res.HostName}[/]",
+                                $"[yellow]{res.Port}[/]",
+                                status,
+                                latency,
+                                diagnostico.EscapeMarkup()
+                            );
+                        }
+                      AnsiConsole.Write(tableScan);
 
                         AnsiConsole.MarkupLine($"[bold green]Varredura finalizada e registrada com sucesso![/]");
 
