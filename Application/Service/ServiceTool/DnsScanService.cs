@@ -1,5 +1,6 @@
 ﻿using Application.InterfacesService.InterfaceTool;
 using Core.Models;
+using DnsClient;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,13 +29,23 @@ namespace Application.Service.ServiceTool
 
                 //buscar o registro de texto
                 IPHostEntry hostEntry = await Dns.GetHostEntryAsync(hostname, cancellationToken);
-                var aliasesList = hostEntry.Aliases.ToList();
 
-                string recordTxt = string.Join(" | ", aliasesList);
+                var dnsLookup = new LookupClient();
 
-                string spf = aliasesList.FirstOrDefault(a => a.StartsWith("v=spf1", StringComparison.OrdinalIgnoreCase)) ?? "Nenhum registro SPF encontrado (v=spf1)";
 
-                string dmarc = aliasesList.FirstOrDefault(a => a.StartsWith("v=DMARC1", StringComparison.OrdinalIgnoreCase)) ?? "Nenhum registro DMARC encontrado (v=DMARC1)";
+                var txtResult = await dnsLookup.QueryAsync(hostname, QueryType.TXT);
+                var txtRecords = txtResult.Answers.TxtRecords()
+                    .SelectMany(r => r.Text)
+                    .ToList();
+
+                var dmarcResult = await dnsLookup.QueryAsync($"_dmarc.{hostname}", QueryType.TXT);
+                var dmarcRecords = dmarcResult.Answers.TxtRecords()
+                    .SelectMany(r => r.Text)
+                    .ToList();
+
+                string spf = txtRecords.FirstOrDefault(a => a.StartsWith("v=spf1", StringComparison.OrdinalIgnoreCase)) ?? "Nenhum registro SPF encontrado (v=spf1)";
+
+                string dmarc = dmarcRecords.FirstOrDefault(a => a.StartsWith("v=DMARC1", StringComparison.OrdinalIgnoreCase)) ?? "Nenhum registro DMARC encontrado (v=DMARC1)";
 
                 return new DnsEntity
                 {
@@ -42,7 +53,7 @@ namespace Application.Service.ServiceTool
                     A = recordA,
                     AAAA = recordAAAA,
                     Mx = string.Join(", ", hostEntry.Aliases), // Assuming MX records are in aliases for this example
-                    Txt = recordTxt,
+                    Txt = string.Join(" | ", txtRecords),
                     Spf = spf,
                     Dmarc = dmarc,
                     Message = "Audit completed successfully",
