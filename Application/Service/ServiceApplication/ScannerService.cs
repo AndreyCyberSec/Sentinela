@@ -18,12 +18,15 @@ namespace Application.Service.ServiceApplication
         private readonly IFileReader readFileService;
         private readonly IFileRegister registerFileService;
         private readonly INetScannerService netScannerService;
+        private readonly IDnsEntityService dnsEntityService;
 
-        public ScannerService( IFileReader _readFileService, IFileRegister registerFileService, INetScannerService _netScannerService)
+        public ScannerService( IFileReader _readFileService, IFileRegister registerFileService,
+            INetScannerService _netScannerService, IDnsEntityService dnsEntityService)
         {
             readFileService = _readFileService;
             this.registerFileService = registerFileService;
             netScannerService = _netScannerService;
+            this.dnsEntityService = dnsEntityService;
         }
 
         public async Task ScannerToolAsync()
@@ -241,6 +244,72 @@ namespace Application.Service.ServiceApplication
                         break;
                     case var t when t.Contains("Register-Dns"):
                         AnsiConsole.MarkupLine("[green]You selected Register-Dns[/]");
+
+                        var domainInput = await AnsiConsole.PromptAsync(
+                                    new TextPrompt<string>("Digite o [green]domínio[/] para auditoria (ex: google.com):")
+                                        .Validate(domain => !string.IsNullOrWhiteSpace(domain) && !domain.Contains("://")
+                                        ? ValidationResult.Success()
+                                        : ValidationResult.Error("[red]Digite apenas o nome do domínio (ex: empresa.com), sem 'http://'.[/]")));
+
+                        var outputDir = await AnsiConsole.PromptAsync(
+                                    new TextPrompt<string>("Diretório para salvar o relatório de log [grey](Enter para padrão)[/]:")
+                                        .AllowEmpty());
+
+                        string domainSanitizado = domainInput.Trim('\'', '"', ' ').ToLower();
+                        string? dirFormatado = string.IsNullOrWhiteSpace(outputDir) ? null : outputDir.Trim('\'', '"', ' ');
+
+                        DnsEntity resultado = null!;
+
+                        await AnsiConsole.Status()
+                                .Spinner(Spinner.Known.Dots)
+                                .StartAsync($"Consultando registros DNS de [yellow]{domainSanitizado}[/]...", async ctx =>
+                                {
+                                    // O serviço executa as chamadas de rede e retorna a entidade preenchida
+                                    resultado = await dnsEntityService.AuditDomainAsync(domainSanitizado);
+
+                                    // Gravação isolada do arquivo de log utilizando os dados diretamente da memória (RAM)
+                                    if (resultado != null)
+                                    {
+                                        await registerFileService.CheckDnsResult(resultado, dirFormatado);
+                                    }
+                                });
+
+                        var table = new Table()
+                                .Border(TableBorder.Rounded)
+                                .Title($"[bold yellow]Resultado da Auditoria DNS: {resultado.Hostname}[/]")
+                                .AddColumns(
+                                    "[bold white]Verificação[/]",
+                                    "[bold white]Status[/]",
+                                    "[bold white]Detalhes / Registros[/]"
+                                );
+                        // Linha: Registro A
+                        table.AddRow("Registro IPv4 (A)", "[green]OK[/]", resultado.A.EscapeMarkup());
+
+                        // Linha: Registro AAAA
+                        table.AddRow("Registro IPv6 (AAAA)", "[green]OK[/]", resultado.AAAA.EscapeMarkup());
+
+                        // Linha: Regra SPF
+                        string spfStatus = resultado.Spf.StartsWith("v=spf1", StringComparison.OrdinalIgnoreCase)
+                            ? "[bold green]PROTEGIDO[/]"
+                            : "[bold red]VULNERÁVEL[/]";
+                        table.AddRow("Política SPF", spfStatus, resultado.Spf.EscapeMarkup());
+
+                        // Linha: Regra DMARC
+                        string dmarcStatus = resultado.Dmarc.StartsWith("v=DMARC1", StringComparison.OrdinalIgnoreCase)
+                            ? "[bold green]PROTEGIDO[/]"
+                            : "[bold yellow]ALERTA[/]";
+                        table.AddRow("Política DMARC", dmarcStatus, resultado.Dmarc.EscapeMarkup());
+
+                        // Imprime a tabela completa no console
+                        AnsiConsole.Write(table);
+
+                        if (!string.IsNullOrEmpty(resultado.Message))
+                        {
+                            AnsiConsole.MarkupLine($"[grey]Mensagem do Diagnóstico: {resultado.Message.EscapeMarkup()}[/]");
+                        }
+
+                        AnsiConsole.MarkupLine("[bold green]Auditoria DNS finalizada com sucesso![/]\n");
+
                         break;
                     case var t when t.Contains("Sys-Auditor"):
                         AnsiConsole.MarkupLine("[green]You selected Sys-Auditor[/]");

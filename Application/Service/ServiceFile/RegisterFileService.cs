@@ -236,12 +236,13 @@ namespace Application.Service.ServiceFile
            
         }
 
-        public async Task CheckDnsResult(IReadOnlyList<DnsEntity> dnsResults, string? outPutDirectory = null)
+        public async Task CheckDnsResult(DnsEntity dnsResults, string? outPutDirectory = null)
         {
-            if(dnsResults == null || dnsResults.Count == 0)
+            List<DnsEntity> dnsList = new List<DnsEntity> { dnsResults };
+            if (dnsResults == null || dnsResults.Equals(" "))
                 throw new ArgumentException("DNS results must be provided.", nameof(dnsResults));
             Directory.CreateDirectory(outPutDirectory ?? AppContext.BaseDirectory);
-            foreach(var item in dnsResults)
+            foreach(var item in dnsList)
             {
                 var fileName = $"DnsCheck_{item.Hostname}.txt";
                 var fullPath = Path.Combine(outPutDirectory ?? AppContext.BaseDirectory, fileName);

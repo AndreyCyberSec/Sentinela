@@ -16,7 +16,7 @@ namespace Core.Interfaces.InterfaceFile
         public Task<string> DecryptEnvAsync(string fileEnv, string password);
         public Task CheckPortResult(IReadOnlyList<NetScannerEntity> scanResults, string? outPutDirectory = null);
 
-        public Task CheckDnsResult(IReadOnlyList<DnsEntity> dnsResults, string? outPutDirectory = null);
+        public Task CheckDnsResult(DnsEntity dnsResults, string? outPutDirectory = null);
 
     }
 }

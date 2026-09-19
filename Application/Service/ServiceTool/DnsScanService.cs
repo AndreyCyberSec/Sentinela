@@ -14,9 +14,9 @@ namespace Application.Service.ServiceTool
     {
         public async Task<DnsEntity> AuditDomainAsync(string hostname, CancellationToken cancellationToken = default)
         {
-            if(string.IsNullOrWhiteSpace(hostname) || !hostname.Contains("://"))
+            if(string.IsNullOrWhiteSpace(hostname) || hostname.Contains("://"))
             {
-                throw new Exception("Hostname cannot be null or empty and need contain a URL scheme (e.g., http:// or https://)");
+                throw new Exception("Hostname cannot be null or empty and cannot contain a URL scheme (e.g., http:// or https://)");
             }
             try
             {
