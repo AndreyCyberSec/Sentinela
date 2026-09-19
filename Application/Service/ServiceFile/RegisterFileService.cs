@@ -22,13 +22,16 @@ namespace Application.Service.ServiceFile
         private readonly IJsonAddress _jsonAddressService;
         private readonly IEgineEnv _engineEnv;
         private readonly INetScannerService netScannerService;
+        private readonly IDnsEntityService dnsEntityService;
 
-        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService, IEgineEnv _engineEnv, INetScannerService netScannerService)
+        public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService,
+            IEgineEnv _engineEnv, INetScannerService netScannerService, IDnsEntityService dnsEntityService)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;
             this._engineEnv = _engineEnv;
             this.netScannerService = netScannerService;
+            this.dnsEntityService = dnsEntityService;
         }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
@@ -231,6 +234,24 @@ namespace Application.Service.ServiceFile
                 
             }
            
+        }
+
+        public async Task CheckDnsResult(IReadOnlyList<DnsEntity> dnsResults, string? outPutDirectory = null)
+        {
+            if(dnsResults == null || dnsResults.Count == 0)
+                throw new ArgumentException("DNS results must be provided.", nameof(dnsResults));
+            Directory.CreateDirectory(outPutDirectory ?? AppContext.BaseDirectory);
+            foreach(var item in dnsResults)
+            {
+                var fileName = $"DnsCheck_{item.Hostname}.txt";
+                var fullPath = Path.Combine(outPutDirectory ?? AppContext.BaseDirectory, fileName);
+                var dnsTarget = await dnsEntityService.AuditDomainAsync(item.Hostname);
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC");
+                string diagnostico = !string.IsNullOrEmpty(dnsTarget.Message) ? $" | Motivo: {dnsTarget.Message}" : string.Empty;
+                await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
+                await writer.WriteLineAsync($"[{timestamp}] {item.Hostname} => {item.A}: {item.AAAA} : " +
+                    $"{item.Txt} : {item.Spf} : {item.Dmarc} : {item.Mx} {diagnostico}");
+            }
         }
     }
 }
