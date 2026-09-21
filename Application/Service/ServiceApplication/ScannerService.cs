@@ -19,14 +19,16 @@ namespace Application.Service.ServiceApplication
         private readonly IFileRegister registerFileService;
         private readonly INetScannerService netScannerService;
         private readonly IDnsEntityService dnsEntityService;
+        private readonly ISysAuditor sysAuditorService;
 
         public ScannerService( IFileReader _readFileService, IFileRegister registerFileService,
-            INetScannerService _netScannerService, IDnsEntityService dnsEntityService)
+            INetScannerService _netScannerService, IDnsEntityService dnsEntityService, ISysAuditor _sysAuditorService)
         {
             readFileService = _readFileService;
             this.registerFileService = registerFileService;
             netScannerService = _netScannerService;
             this.dnsEntityService = dnsEntityService;
+            this.sysAuditorService = _sysAuditorService;
         }
 
         public async Task ScannerToolAsync()
@@ -313,11 +315,55 @@ namespace Application.Service.ServiceApplication
                         break;
                     case var t when t.Contains("Sys-Auditor"):
                         AnsiConsole.MarkupLine("[green]You selected Sys-Auditor[/]");
+
+                        var diretorio = await AnsiConsole.PromptAsync(
+                                   new TextPrompt<string>("Diretório para salvar o relatório de log [grey](Enter para padrão)[/]:")
+                                       .AllowEmpty());
+
+                        string? dirFormatadoSys = string.IsNullOrWhiteSpace(diretorio) ? null : diretorio.Trim('\'', '"', ' ');
+                        SysAuditorEntity resultadoSys = null!;
+                        await AnsiConsole.Status()
+                                .Spinner(Spinner.Known.Dots)
+                                .StartAsync($"Consultando maquina de [yellow]{sysAuditorService.GetHostname()}[/]...", async ctx =>
+                                {
+                                    // O serviço executa as chamadas de rede e retorna a entidade preenchida
+                                    resultadoSys = await sysAuditorService.AuditSystemAsync();
+
+                                    // Gravação isolada do arquivo de log utilizando os dados diretamente da memória (RAM)
+                                    if (resultadoSys != null)
+                                    {
+                                        await registerFileService.RegisterSysAuditor(resultadoSys, dirFormatadoSys);
+                                    }
+                                });
+
+                        var tableSys = new Table()
+                                .Border(TableBorder.Rounded)
+                                .Title($"[bold yellow]Resultado da Auditoria do Sistema: {resultadoSys.HostNameMachine}[/]")
+                                .AddColumns(
+                                    "[bold white]Verificação[/]",
+                                    "[bold white]Resultado[/]"
+                                );
+                        tableSys.AddRow("Nome da Máquina", resultadoSys.HostNameMachine.EscapeMarkup());    
+                        tableSys.AddRow("Versão do Sistema Operacional", resultadoSys.OSVersion.EscapeMarkup());
+                        tableSys.AddRow("Uso da CPU", resultadoSys.CPUusage.EscapeMarkup());
+                        tableSys.AddRow("Uso da Memória RAM", resultadoSys.RAMusage.EscapeMarkup());
+                        tableSys.AddRow("Uso do Disco", resultadoSys.DiskUsage.EscapeMarkup());
+                        tableSys.AddRow("Processos Ativos", resultadoSys.ActiveProcesses.EscapeMarkup());
+                        tableSys.AddRow("Interface de Rede", resultadoSys.NetworkInterface.EscapeMarkup());
+                        tableSys.AddRow("Tempo de Atividade do Sistema", resultadoSys.SystemUptime.EscapeMarkup());
+                        tableSys.AddRow("Status de Conformidade", resultadoSys.ComplianceStatus.EscapeMarkup());
+                        tableSys.AddRow("Mensagem do Diagnóstico", resultadoSys.Message.EscapeMarkup());
+                        tableSys.AddRow("Timestamp", resultadoSys.Timestamp.EscapeMarkup());
+
+                        AnsiConsole.Write(tableSys);
+
+                        AnsiConsole.MarkupLine("[bold green]Auditoria do Sistema finalizada com sucesso![/]\n");
+
                         break;
                     case var t when t.Contains("Check-SSl/TLS"):
                         AnsiConsole.MarkupLine("[green]You selected Check-SSl/TLS[/]");
                         break;
-                    default:
+                    default:    
                         AnsiConsole.MarkupLine("[red]No valid tool selected.[/]");
                         break;
                 }

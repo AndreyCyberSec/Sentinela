@@ -23,13 +23,15 @@ namespace Application.Service.ServiceFile
         private readonly IEgineEnv _engineEnv;
         private readonly INetScannerService netScannerService;
         private readonly IDnsEntityService dnsEntityService;
+        private readonly ISysAuditor sysAuditorService;
 
         public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService,
-            IEgineEnv _engineEnv, INetScannerService netScannerService, IDnsEntityService dnsEntityService)
+            IEgineEnv _engineEnv, INetScannerService netScannerService, IDnsEntityService dnsEntityService, ISysAuditor sysAuditorService)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;
             this._engineEnv = _engineEnv;
+            this.sysAuditorService = sysAuditorService;
             this.netScannerService = netScannerService;
             this.dnsEntityService = dnsEntityService;
         }
@@ -252,6 +254,27 @@ namespace Application.Service.ServiceFile
                 await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
                 await writer.WriteLineAsync($"[{timestamp}] {item.Hostname} => {item.A}: {item.AAAA} : " +
                     $"{item.Txt} : {item.Spf} : {item.Dmarc} : {item.Mx} {diagnostico}");
+            }
+        }
+
+        public async Task RegisterSysAuditor(SysAuditorEntity sysAuditorEntity, string? outPutDirectory = null)
+        {
+            if(sysAuditorEntity == null)
+                throw new ArgumentNullException(nameof(sysAuditorEntity), "SysAuditorEntity must be provided.");
+
+            await sysAuditorService.AuditSystemAsync();
+            Directory.CreateDirectory(outPutDirectory ?? AppContext.BaseDirectory);
+            foreach (var item in new List<SysAuditorEntity> { sysAuditorEntity })
+            {
+                var fileName = $"SysAuditor_{item.HostNameMachine}.txt";
+                var fullPath = Path.Combine(outPutDirectory ?? AppContext.BaseDirectory, fileName);
+                string timestamp =  DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC");
+                var diagnostico =  !string.IsNullOrEmpty(item.Message) ? $" | Motivo: {item.Message}" : string.Empty;
+              await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
+               await writer.WriteLineAsync($"[{timestamp}] Host: {item.HostNameMachine} | OS: {item.OSVersion} | CPU: {item.CPUusage}" +
+                    $" | RAM: {item.RAMusage} | Disk: {item.DiskUsage} | Active Processes: {item.ActiveProcesses} " +
+                    $"| Network Interface: {item.NetworkInterface} | Uptime: {item.SystemUptime}" +
+                    $" | Compliance Status: {item.ComplianceStatus}{diagnostico}");
             }
         }
     }

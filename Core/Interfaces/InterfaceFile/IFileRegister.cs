@@ -18,5 +18,7 @@ namespace Core.Interfaces.InterfaceFile
 
         public Task CheckDnsResult(DnsEntity dnsResults, string? outPutDirectory = null);
 
+        public Task RegisterSysAuditor(SysAuditorEntity sysAuditorEntity, string? outPutDirectory = null);
+
     }
 }

@@ -64,5 +64,10 @@ namespace Application.Service.ServiceTool
                return report;
            });
         }
+
+        public Task<string> GetHostname()
+        {
+            return  Task.FromResult(Environment.MachineName);
+        }
     }
 }

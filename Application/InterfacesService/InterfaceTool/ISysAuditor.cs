@@ -10,5 +10,7 @@ namespace Application.InterfacesService.InterfaceTool
     public interface ISysAuditor
     {
         public Task<SysAuditorEntity> AuditSystemAsync();
+
+        public Task<string> GetHostname();
     }
 }
