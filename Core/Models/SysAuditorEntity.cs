@@ -10,14 +10,28 @@ namespace Core.Models
     {
         public string HostNameMachine { get; init; } = Environment.MachineName;
         public string OSVersion { get; init; } = Environment.OSVersion.ToString();
-        public string CPUusage { get; init; } = string.Empty;
-        public string RAMusage { get; init; } = string.Empty;
-        public string DiskUsage { get; init; } = string.Empty;
-        public string ActiveProcesses { get; init; } = string.Empty;
-        public string NetworkInterface { get; init; } = string.Empty;
-        public string SystemUptime { get; init; } = string.Empty;
-        public string ComplianceStatus { get; init; } = string.Empty;
-        public string Message { get; init; } = string.Empty;
-        public string Timestamp { get; init; } = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        public string CPUusage { get; set; } = string.Empty;
+        public string RAMusage { get; set; } = string.Empty;
+        public string DiskUsage { get; set; } = string.Empty;
+        public string ActiveProcesses { get; set; } = string.Empty;
+        public string NetworkInterface { get; set; } = string.Empty;
+        public string SystemUptime { get; set; } = string.Empty;
+        public string ComplianceStatus { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string Timestamp { get; set; } = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+
+        public SysAuditorEntity() { }
+
+        public SysAuditorEntity(string cpuUsage, string ramUsage, string diskUsage, string activeProcesses, string networkInterface, string systemUptime, string complianceStatus, string message)
+        {
+            CPUusage = cpuUsage;
+            RAMusage = ramUsage;
+            DiskUsage = diskUsage;
+            ActiveProcesses = activeProcesses;
+            NetworkInterface = networkInterface;
+            SystemUptime = systemUptime;
+            ComplianceStatus = complianceStatus;
+            Message = message;
+        }
     }
 }
