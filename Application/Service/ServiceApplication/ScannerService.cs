@@ -321,10 +321,11 @@ namespace Application.Service.ServiceApplication
                                        .AllowEmpty());
 
                         string? dirFormatadoSys = string.IsNullOrWhiteSpace(diretorio) ? null : diretorio.Trim('\'', '"', ' ');
+                        var hostname = sysAuditorService.GetHostname().EscapeMarkup();
                         SysAuditorEntity resultadoSys = null!;
                         await AnsiConsole.Status()
                                 .Spinner(Spinner.Known.Dots)
-                                .StartAsync($"Consultando maquina de [yellow]{sysAuditorService.GetHostname()}[/]...", async ctx =>
+                                .StartAsync($"Consultando maquina de [yellow]{hostname}...[/]", async ctx =>
                                 {
                                     // O serviço executa as chamadas de rede e retorna a entidade preenchida
                                     resultadoSys = await sysAuditorService.AuditSystemAsync();
@@ -352,6 +353,12 @@ namespace Application.Service.ServiceApplication
                         tableSys.AddRow("Interface de Rede", resultadoSys.NetworkInterface.EscapeMarkup());
                         tableSys.AddRow("Tempo de Atividade do Sistema", resultadoSys.SystemUptime.EscapeMarkup());
                         tableSys.AddRow("Status de Conformidade", resultadoSys.ComplianceStatus.EscapeMarkup());
+                        tableSys.AddRow("Mensagem do Diagnóstico", resultadoSys.Message.EscapeMarkup());
+                        tableSys.AddRow("Timestamp", resultadoSys.Timestamp.EscapeMarkup());
+
+                        string statusCor = resultadoSys.ComplianceStatus.Contains("ALERTA") ? "yellow" : "green";
+                        tableSys.AddRow("Status de Conformidade", $"[{statusCor}]{resultadoSys.ComplianceStatus.EscapeMarkup()}[/]");
+
                         tableSys.AddRow("Mensagem do Diagnóstico", resultadoSys.Message.EscapeMarkup());
                         tableSys.AddRow("Timestamp", resultadoSys.Timestamp.EscapeMarkup());
 
