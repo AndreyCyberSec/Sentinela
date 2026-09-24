@@ -14,7 +14,7 @@ namespace Application.Service.ServiceTool
 {
     public class CheckCAService : ICheckCA
     {
-        public  Task<CheckCAEntity> GetHostAsync(string hostName, int port)
+        public Task<CheckCAEntity> GetHostAsync(string hostName, int port)
         {
             var checkHost = new CheckCAEntity { HostName = hostName, Port = port };
             return Task.FromResult(checkHost);
@@ -31,7 +31,7 @@ namespace Application.Service.ServiceTool
                 using var sslStream = new SslStream(
                     client.GetStream(),
                     false,
-                    (sender,certificate,chain,sslPolicyErrors) =>
+                    (sender, certificate, chain, sslPolicyErrors) =>
                     {
                         host.IsValid = sslPolicyErrors == SslPolicyErrors.None;
                         return true;
@@ -71,7 +71,7 @@ namespace Application.Service.ServiceTool
                         host.Status = "CONFORME";
                         host.Message = "Certificado válido e em conformidade de segurança.";
                     }
-                   
+
                 }
                 else
                 {
@@ -81,9 +81,10 @@ namespace Application.Service.ServiceTool
             }
             catch (Exception ex)
             {
-               host.Status = "ERRO";
+                host.Status = "ERRO";
                 host.Message = $"Erro ao verificar o certificado SSL/TLS: {ex.Message}";
             }
             return host;
         }
+    }
 }

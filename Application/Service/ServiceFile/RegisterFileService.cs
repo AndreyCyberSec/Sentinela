@@ -24,9 +24,11 @@ namespace Application.Service.ServiceFile
         private readonly INetScannerService netScannerService;
         private readonly IDnsEntityService dnsEntityService;
         private readonly ISysAuditor sysAuditorService;
+        private readonly ICheckCA checkCAService;
 
         public RegisterFileService(ILogAddress logAddressService, IJsonAddress _jsonAddressService,
-            IEgineEnv _engineEnv, INetScannerService netScannerService, IDnsEntityService dnsEntityService, ISysAuditor sysAuditorService)
+            IEgineEnv _engineEnv, INetScannerService netScannerService,
+            IDnsEntityService dnsEntityService, ISysAuditor sysAuditorService, ICheckCA checkCAService)
         {
             this.logAddressService = logAddressService;
             this._jsonAddressService = _jsonAddressService;
@@ -34,6 +36,8 @@ namespace Application.Service.ServiceFile
             this.sysAuditorService = sysAuditorService;
             this.netScannerService = netScannerService;
             this.dnsEntityService = dnsEntityService;
+            this.checkCAService = checkCAService;
+           
         }
         public async Task RegisterLogAsync(string fileName, string filePath, string originalFile)
         {
@@ -275,6 +279,25 @@ namespace Application.Service.ServiceFile
                     $" | RAM: {item.RAMusage} | Disk: {item.DiskUsage} | Active Processes: {item.ActiveProcesses} " +
                     $"| Network Interface: {item.NetworkInterface} | Uptime: {item.SystemUptime}" +
                     $" | Compliance Status: {item.ComplianceStatus}{diagnostico}");
+            }
+        }
+
+        public async Task CheckCAResult(CheckCAEntity checkCAEntity, string? outPutDirectory = null)
+        {
+            if(checkCAEntity == null)
+                throw new ArgumentNullException(nameof(checkCAEntity), "CheckCAEntity must be provided.");
+
+            Directory.CreateDirectory(outPutDirectory ?? AppContext.BaseDirectory);
+            foreach(var item in  new List<CheckCAEntity> { checkCAEntity })
+            {
+                var fileName = $"Check_SSL/TLS:{item.HostName}";
+                var fullPath = Path.Combine(outPutDirectory ?? AppContext.BaseDirectory, fileName);
+                string timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss UTC");
+                var diagnostico = !string.IsNullOrEmpty(item.Message) ? $" | Motivo: {item.Message}" : string.Empty;
+                await using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8);
+                await writer.WriteLineAsync($"[{timestamp}] | Host: {item.HostName} | Port: {item.Port} | Issuer: {item.Issuer}" +
+                    $" | Subject: {item.Subject}");
+
             }
         }
     }

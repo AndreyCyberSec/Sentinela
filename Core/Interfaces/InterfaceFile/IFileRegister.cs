@@ -20,5 +20,7 @@ namespace Core.Interfaces.InterfaceFile
 
         public Task RegisterSysAuditor(SysAuditorEntity sysAuditorEntity, string? outPutDirectory = null);
 
+        public Task CheckCAResult(CheckCAEntity checkCAEntity, string? outPutDirectory = null);
+
     }
 }
